@@ -2,6 +2,8 @@
 
 RIndex is a modern frontend-only cybersecurity analysis platform built with React, Vite, TypeScript and Tailwind CSS.
 
+Github: https://github.com/homophobiaa/Rindex
+
 The project evaluates user cybersecurity habits such as:
 - password strength
 - phishing awareness
