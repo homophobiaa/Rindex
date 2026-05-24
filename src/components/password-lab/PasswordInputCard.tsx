@@ -48,7 +48,10 @@ export function PasswordInputCard({
   };
 
   const handleDemo = () => {
-    const next = DEMO_EXAMPLES[Math.floor(Math.random() * DEMO_EXAMPLES.length)];
+    // Pick an example different from the current value so repeated clicks
+    // always produce a visible change.
+    const pool = DEMO_EXAMPLES.filter((p) => p !== password);
+    const next = pool[Math.floor(Math.random() * pool.length)];
     onChange(next);
     onDemoChange(true);
     setVisible(true);
@@ -108,7 +111,7 @@ export function PasswordInputCard({
           )}
           style={{ boxShadow: focused ? `0 0 0 4px ${color}1f` : undefined }}
         >
-          <svg viewBox="0 0 24 24" className="h-4 w-4 text-ink-subtle" fill="none" stroke="currentColor" strokeWidth="1.6">
+          <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0 text-ink-subtle" fill="none" stroke="currentColor" strokeWidth="1.6">
             <rect x="4" y="10" width="16" height="10" rx="2" />
             <path d="M8 10V7a4 4 0 1 1 8 0v3" />
           </svg>
@@ -128,14 +131,9 @@ export function PasswordInputCard({
             data-1p-ignore
             data-lpignore="true"
             placeholder="Type or paste a password"
-            className="flex-1 bg-transparent font-mono text-[18px] text-ink placeholder:text-ink-tertiary focus:outline-none"
+            className="min-w-0 flex-1 bg-transparent font-mono text-[18px] text-ink placeholder:text-ink-tertiary focus:outline-none"
           />
-          {isDemo && (
-            <span className="hidden rounded-md border border-info/30 bg-info/10 px-2 py-0.5 font-mono text-[10.5px] uppercase tracking-wider text-info sm:inline-block">
-              Demo example
-            </span>
-          )}
-          <div className="flex items-center gap-1">
+          <div className="flex shrink-0 items-center gap-1">
             <IconButton
               label={visible ? 'Hide' : 'Show'}
               onClick={() => setVisible((v) => !v)}
@@ -159,10 +157,10 @@ export function PasswordInputCard({
           </div>
         </div>
 
-        {/* Demo helper (mobile-visible) */}
+        {/* Demo helper — below the input so it never crowds the row */}
         {isDemo && (
-          <div className="mt-2 inline-flex items-center gap-2 rounded-md bg-info/10 px-2 py-1 text-caption text-info sm:hidden">
-            <span className="inline-block h-1 w-1 rounded-full bg-info" />
+          <div className="mt-2 inline-flex items-center gap-2 rounded-md border border-info/25 bg-info/10 px-2.5 py-1 text-caption text-info">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-info" />
             Demo example — not your real password.
           </div>
         )}

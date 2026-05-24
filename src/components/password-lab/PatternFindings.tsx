@@ -59,7 +59,7 @@ export function PatternFindings({ analysis }: { analysis: AnalysisResult }) {
               key="findings"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="grid gap-2 sm:grid-cols-2"
+              className="grid gap-2"
             >
               {analysis.patterns.map((p, i) => (
                 <FindingCard key={p.id} finding={p} index={i} />

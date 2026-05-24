@@ -36,6 +36,14 @@ export default function PasswordLab() {
 
   const analysis = useMemo(() => analyzePassword(password), [password]);
 
+  // If the user clears the input, collapse advanced sections so they
+  // don't pop back open unexpectedly when typing resumes.
+  useEffect(() => {
+    if (analysis.length === 0 && showAdvanced) {
+      setShowAdvanced(false);
+    }
+  }, [analysis.length, showAdvanced]);
+
   const handleAnalyze = () => {
     verdictRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -80,7 +88,7 @@ export default function PasswordLab() {
         </motion.header>
 
         {/* Input */}
-        <div className="mx-auto mt-10 max-w-3xl">
+        <div className="mx-auto mt-10 max-w-2xl">
           <PasswordInputCard
             password={password}
             onChange={setPassword}
@@ -92,13 +100,13 @@ export default function PasswordLab() {
         </div>
 
         {/* Verdict */}
-        <div ref={verdictRef} className="mx-auto mt-6 max-w-5xl scroll-mt-24">
+        <div ref={verdictRef} className="mx-auto mt-6 max-w-3xl scroll-mt-24">
           <VerdictSummary analysis={analysis} />
         </div>
 
         {/* Advanced toggle */}
         {analysis.length > 0 && (
-          <div className="mx-auto mt-8 flex max-w-5xl items-center justify-center">
+          <div className="mx-auto mt-8 flex max-w-3xl items-center justify-center">
             <button
               type="button"
               onClick={handleToggleAdvanced}
@@ -127,7 +135,7 @@ export default function PasswordLab() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="mx-auto mt-8 max-w-6xl scroll-mt-24"
+            className="mx-auto mt-8 max-w-5xl scroll-mt-24"
           >
             <div className="mb-6 flex items-center gap-3">
               <span className="h-px flex-1 bg-hairline" />
@@ -153,7 +161,7 @@ export default function PasswordLab() {
         )}
 
         {/* Trust footer */}
-        <div className="mx-auto mt-12 max-w-5xl">
+        <div className="mx-auto mt-12 max-w-3xl">
           <div className="panel flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-3">
               <span className="grid h-9 w-9 place-items-center rounded-full bg-primary/15 text-primary">

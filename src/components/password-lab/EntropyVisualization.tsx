@@ -103,9 +103,19 @@ export function EntropyVisualization({ analysis }: { analysis: AnalysisResult })
               const max = 280;
               const pct = Math.min(100, (b.bits / max) * 100);
               return (
-                <li key={b.name} className="flex items-center gap-3">
-                  <div className="w-32 shrink-0 text-caption text-ink-muted">{b.name}</div>
-                  <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-surface-2">
+                <li
+                  key={b.name}
+                  className="grid items-center gap-x-3 gap-y-1 [grid-template-columns:minmax(0,1fr)_auto] sm:[grid-template-columns:120px_minmax(0,1fr)_64px]"
+                >
+                  <div className="truncate text-caption text-ink-muted">{b.name}</div>
+                  <div
+                    className={`justify-self-end font-mono text-[12px] tabular-nums sm:order-3 ${
+                      b.highlight ? 'text-primary' : 'text-ink-subtle'
+                    }`}
+                  >
+                    {b.bits.toFixed(1)} b
+                  </div>
+                  <div className="relative col-span-2 h-2.5 overflow-hidden rounded-full bg-surface-2 sm:col-span-1 sm:order-2">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${pct}%` }}
@@ -118,13 +128,6 @@ export function EntropyVisualization({ analysis }: { analysis: AnalysisResult })
                         boxShadow: b.highlight ? '0 0 18px -4px #5e6ad2aa' : undefined,
                       }}
                     />
-                  </div>
-                  <div
-                    className={`w-20 text-right font-mono text-[12px] tabular-nums ${
-                      b.highlight ? 'text-primary' : 'text-ink-subtle'
-                    }`}
-                  >
-                    {b.bits.toFixed(1)} b
                   </div>
                 </li>
               );

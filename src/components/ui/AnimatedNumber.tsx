@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { animate, useMotionValue, useTransform, motion } from 'framer-motion';
 
 /**
@@ -20,7 +20,6 @@ export function AnimatedNumber({
   format?: (n: number) => string;
 }) {
   const mv = useMotionValue(0);
-  const previous = useRef(0);
   const display = useTransform(mv, (latest) => {
     if (format) return format(latest);
     return latest.toLocaleString(undefined, {
@@ -30,12 +29,13 @@ export function AnimatedNumber({
   });
 
   useEffect(() => {
-    const controls = animate(previous.current, value, {
+    // Tween from whatever value is currently displayed so rapid changes
+    // never visually snap backwards.
+    const controls = animate(mv.get(), value, {
       duration,
       ease: [0.16, 1, 0.3, 1],
       onUpdate: (latest) => mv.set(latest),
     });
-    previous.current = value;
     return controls.stop;
   }, [value, duration, mv]);
 

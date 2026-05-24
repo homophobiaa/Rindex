@@ -32,10 +32,10 @@ export default function Navbar() {
           : 'border-b border-transparent bg-transparent',
       )}
     >
-      <div className="container-rindex flex h-[68px] items-center justify-between">
+      <div className="container-rindex flex h-[72px] items-center justify-between">
         <Link to="/" className="flex items-center" aria-label="RIndex home">
-          <Logo size={36} className="md:hidden" withWordmark={false} />
-          <Logo size={64} className="hidden md:inline-flex" />
+          <Logo size={32} className="md:hidden" withWordmark={false} />
+          <Logo size={44} className="hidden md:inline-flex" />
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
