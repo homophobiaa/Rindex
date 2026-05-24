@@ -7,7 +7,8 @@ const cols: { title: string; links: { label: string; to: string; external?: bool
     links: [
       { label: 'Assessment', to: '/assessment' },
       { label: 'Password Lab', to: '/password-lab' },
-      { label: 'Risk Graph', to: '/risk-graph' },
+      { label: 'Attack Paths', to: '/risk-graph' },
+      { label: 'Crypto Lab', to: '/crypto-lab' },
       { label: 'Methodology', to: '/methodology' },
     ],
   },
