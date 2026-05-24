@@ -34,7 +34,7 @@ export default function Navbar() {
     >
       <div className="container-rindex flex h-14 items-center justify-between">
         <Link to="/" className="flex items-center gap-2" aria-label="RIndex home">
-          <Logo />
+          <Logo size={22} />
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">
@@ -58,7 +58,7 @@ export default function Navbar() {
 
         <div className="hidden items-center gap-2 md:flex">
           <LinkButton
-            to="https://github.com"
+            to="https://github.com/homophobiaa/Rindex"
             external
             variant="secondary"
             size="sm"

@@ -23,8 +23,8 @@ const cols: { title: string; links: { label: string; to: string; external?: bool
   {
     title: 'Open Source',
     links: [
-      { label: 'GitHub', to: 'https://github.com', external: true },
-      { label: 'License', to: 'https://github.com', external: true },
+      { label: 'GitHub', to: 'https://github.com/homophobiaa/Rindex', external: true },
+      { label: 'License', to: 'https://github.com/homophobiaa/Rindex/blob/main/LICENSE', external: true },
       { label: 'Changelog', to: '/methodology#changelog' },
     ],
   },
@@ -35,7 +35,7 @@ export default function Footer() {
     <footer className="relative mt-section border-t border-hairline bg-canvas">
       <div className="container-rindex grid grid-cols-2 gap-10 py-16 md:grid-cols-12">
         <div className="col-span-2 md:col-span-5">
-          <Logo />
+          <Logo size={26} />
           <p className="mt-4 max-w-sm text-body-sm text-ink-subtle">
             RIndex is a frontend-only cybersecurity risk analyzer. It runs entirely in your
             browser — no passwords, answers, or results ever leave your device.
