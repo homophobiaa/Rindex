@@ -5,26 +5,36 @@ import { generateSecurePassword } from '@/lib/password/analyze';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/cn';
 
-const SAFE_MODE_TEMPLATE = 'XxxxxxxxxxXX99!!';
+const DEMO_EXAMPLES = [
+  'password123',
+  'qwerty2024',
+  'iloveyou',
+  'Summer2024!',
+  'Tr0ub4dor&3',
+];
 
 type Props = {
   password: string;
   onChange: (v: string) => void;
   analysis: AnalysisResult;
-  safeMode: boolean;
-  onSafeModeChange: (v: boolean) => void;
+  /** Marks the input as currently holding a demo (not the user's real password). */
+  isDemo: boolean;
+  onDemoChange: (v: boolean) => void;
+  /** Smooth-scrolls to the result panel. */
+  onAnalyze: () => void;
 };
 
 /**
- * Cinematic password input panel. Live strength bar reflects the current
- * classification color and entropy bits. Never logs the password.
+ * Simplified password input. Three obvious actions: analyze, try a demo,
+ * generate a strong one. No mystery toggles.
  */
 export function PasswordInputCard({
   password,
   onChange,
   analysis,
-  safeMode,
-  onSafeModeChange,
+  isDemo,
+  onDemoChange,
+  onAnalyze,
 }: Props) {
   const [visible, setVisible] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -33,7 +43,20 @@ export function PasswordInputCard({
   const handleGenerate = () => {
     const next = generateSecurePassword(20);
     onChange(next);
+    onDemoChange(false);
     setVisible(true);
+  };
+
+  const handleDemo = () => {
+    const next = DEMO_EXAMPLES[Math.floor(Math.random() * DEMO_EXAMPLES.length)];
+    onChange(next);
+    onDemoChange(true);
+    setVisible(true);
+  };
+
+  const handleInputChange = (v: string) => {
+    onChange(v);
+    if (isDemo) onDemoChange(false);
   };
 
   const handleCopy = async () => {
@@ -43,7 +66,7 @@ export function PasswordInputCard({
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1400);
     } catch {
-      /* noop */
+      /* clipboard unavailable */
     }
   };
 
@@ -52,134 +75,134 @@ export function PasswordInputCard({
 
   return (
     <div className="relative">
-      {/* halo */}
       <div
         aria-hidden
         className="pointer-events-none absolute -inset-6 -z-10 rounded-[28px]"
         style={{
           background: `radial-gradient(60% 60% at 50% 0%, ${color}26, transparent 70%)`,
-          opacity: focused ? 1 : 0.6,
+          opacity: focused ? 1 : 0.55,
           transition: 'opacity 350ms ease',
         }}
       />
 
       <div className="panel-glass gradient-border noise relative overflow-hidden p-6 md:p-8">
-        {/* Top bar */}
-        <div className="flex items-center justify-between">
+        {/* Top label */}
+        <div className="flex items-center justify-between gap-3">
+          <label htmlFor="pw-input" className="text-eyebrow uppercase text-ink-subtle">
+            Enter a password
+          </label>
           <div className="inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-2.5 py-1 text-caption text-success">
             <span className="relative inline-flex h-1.5 w-1.5">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success/70 opacity-75" />
               <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-success" />
             </span>
-            Local-only analysis · 0 network requests
-          </div>
-
-          <div className="inline-flex items-center gap-1 rounded-md border border-hairline bg-surface-2 p-0.5 text-caption">
-            <button
-              type="button"
-              onClick={() => {
-                onSafeModeChange(false);
-              }}
-              className={cn(
-                'rounded-[6px] px-2.5 py-1 transition-colors',
-                !safeMode ? 'bg-surface-3 text-ink' : 'text-ink-subtle hover:text-ink',
-              )}
-            >
-              Real password
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                onSafeModeChange(true);
-                if (!password) onChange(SAFE_MODE_TEMPLATE);
-              }}
-              className={cn(
-                'rounded-[6px] px-2.5 py-1 transition-colors',
-                safeMode ? 'bg-surface-3 text-ink' : 'text-ink-subtle hover:text-ink',
-              )}
-            >
-              Simulate
-            </button>
+            Local-only
           </div>
         </div>
 
         {/* Input */}
-        <div className="mt-6">
-          <label htmlFor="pw-input" className="text-eyebrow uppercase text-ink-subtle">
-            {safeMode ? 'Pattern simulation' : 'Enter a password to analyze'}
-          </label>
-          <div
-            className={cn(
-              'mt-2 flex items-center gap-2 rounded-lg border bg-surface-2/60 px-4 py-3 transition-all duration-200',
-              focused ? 'border-primary/50 bg-surface-2' : 'border-hairline',
-            )}
-            style={{ boxShadow: focused ? `0 0 0 4px ${color}1f` : undefined }}
-          >
-            <svg viewBox="0 0 24 24" className="h-4 w-4 text-ink-subtle" fill="none" stroke="currentColor" strokeWidth="1.6">
-              <rect x="4" y="10" width="16" height="10" rx="2" />
-              <path d="M8 10V7a4 4 0 1 1 8 0v3" />
-            </svg>
-            <input
-              id="pw-input"
-              type={visible || safeMode ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => onChange(e.target.value)}
-              onFocus={() => setFocused(true)}
-              onBlur={() => setFocused(false)}
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck={false}
-              data-1p-ignore
-              data-lpignore="true"
-              placeholder={safeMode ? 'Edit this safe pattern...' : 'Type or paste a password'}
-              className="flex-1 bg-transparent font-mono text-[18px] text-ink placeholder:text-ink-tertiary focus:outline-none"
+        <div
+          className={cn(
+            'mt-2 flex items-center gap-2 rounded-lg border bg-surface-2/60 px-4 py-3.5 transition-all duration-200',
+            focused ? 'border-primary/50 bg-surface-2' : 'border-hairline',
+          )}
+          style={{ boxShadow: focused ? `0 0 0 4px ${color}1f` : undefined }}
+        >
+          <svg viewBox="0 0 24 24" className="h-4 w-4 text-ink-subtle" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <rect x="4" y="10" width="16" height="10" rx="2" />
+            <path d="M8 10V7a4 4 0 1 1 8 0v3" />
+          </svg>
+          <input
+            id="pw-input"
+            type={visible ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => handleInputChange(e.target.value)}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') onAnalyze();
+            }}
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+            data-1p-ignore
+            data-lpignore="true"
+            placeholder="Type or paste a password"
+            className="flex-1 bg-transparent font-mono text-[18px] text-ink placeholder:text-ink-tertiary focus:outline-none"
+          />
+          {isDemo && (
+            <span className="hidden rounded-md border border-info/30 bg-info/10 px-2 py-0.5 font-mono text-[10.5px] uppercase tracking-wider text-info sm:inline-block">
+              Demo example
+            </span>
+          )}
+          <div className="flex items-center gap-1">
+            <IconButton
+              label={visible ? 'Hide' : 'Show'}
+              onClick={() => setVisible((v) => !v)}
+              icon={visible ? <EyeOffIcon /> : <EyeIcon />}
             />
-            <div className="flex items-center gap-1">
-              <IconButton
-                label={visible ? 'Hide' : 'Show'}
-                onClick={() => setVisible((v) => !v)}
-                icon={visible ? <EyeOffIcon /> : <EyeIcon />}
-              />
-              <IconButton
-                label={copied ? 'Copied' : 'Copy'}
-                onClick={handleCopy}
-                disabled={!password}
-                icon={copied ? <CheckIcon /> : <CopyIcon />}
-              />
-              <IconButton label="Clear" onClick={() => onChange('')} disabled={!password} icon={<XIcon />} />
-            </div>
+            <IconButton
+              label={copied ? 'Copied' : 'Copy'}
+              onClick={handleCopy}
+              disabled={!password}
+              icon={copied ? <CheckIcon /> : <CopyIcon />}
+            />
+            <IconButton
+              label="Clear"
+              onClick={() => {
+                onChange('');
+                onDemoChange(false);
+              }}
+              disabled={!password}
+              icon={<XIcon />}
+            />
           </div>
+        </div>
 
-          {/* live strength bar */}
-          <div className="mt-4">
-            <div className="flex items-center justify-between text-caption">
-              <span className="text-ink-subtle">Real-time entropy</span>
-              <span className="font-mono text-ink-muted">
-                {analysis.effectiveEntropyBits.toFixed(1)} bits · {analysis.length} chars
-              </span>
-            </div>
-            <SegmentedStrengthBar pct={pct} color={color} />
+        {/* Demo helper (mobile-visible) */}
+        {isDemo && (
+          <div className="mt-2 inline-flex items-center gap-2 rounded-md bg-info/10 px-2 py-1 text-caption text-info sm:hidden">
+            <span className="inline-block h-1 w-1 rounded-full bg-info" />
+            Demo example — not your real password.
           </div>
+        )}
+
+        {/* Helper text */}
+        <p className="mt-3 text-caption text-ink-tertiary">
+          Everything runs locally in your browser. You can use a demo password if you
+          don&rsquo;t want to type a real one.
+        </p>
+
+        {/* Live strength bar */}
+        <div className="mt-5">
+          <div className="flex items-center justify-between text-caption">
+            <span className="text-ink-subtle">Strength</span>
+            <span className="font-mono text-ink-tertiary">
+              {analysis.length > 0
+                ? `${analysis.effectiveEntropyBits.toFixed(1)} bits · ${analysis.length} chars`
+                : '—'}
+            </span>
+          </div>
+          <SegmentedStrengthBar pct={pct} color={color} />
         </div>
 
         {/* Actions */}
         <div className="mt-6 flex flex-wrap items-center gap-2">
-          <Button variant="secondary" size="sm" onClick={handleGenerate} leadingIcon={<SparkleIcon />}>
-            Generate secure password
-          </Button>
           <Button
-            variant="tertiary"
-            size="sm"
-            onClick={() => onChange('')}
+            variant="primary"
+            size="md"
+            onClick={onAnalyze}
             disabled={!password}
-            leadingIcon={<XIcon />}
+            trailingIcon={<ArrowDownIcon />}
           >
-            Clear
+            Analyze my password
           </Button>
-          <span className="ml-auto max-w-md text-caption text-ink-tertiary">
-            Tip: avoid pasting passwords you actively use on critical accounts. The pattern
-            simulator gives you the same analysis without typing your real one.
-          </span>
+          <Button variant="secondary" size="md" onClick={handleDemo} leadingIcon={<BeakerIcon />}>
+            Try demo password
+          </Button>
+          <Button variant="tertiary" size="md" onClick={handleGenerate} leadingIcon={<SparkleIcon />}>
+            Generate strong password
+          </Button>
         </div>
       </div>
     </div>
@@ -291,6 +314,20 @@ function SparkleIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.6">
       <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function BeakerIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d="M9 3h6M10 3v6L4 19a2 2 0 0 0 1.7 3h12.6A2 2 0 0 0 20 19L14 9V3" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function ArrowDownIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M12 5v14M6 13l6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
