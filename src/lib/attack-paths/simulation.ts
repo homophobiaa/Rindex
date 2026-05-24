@@ -2,13 +2,15 @@
  * Attack simulation engine.
  *
  * Drives a step-by-step traversal of a scenario's canonical attack path
- * with play / pause / step / reset controls.  Components subscribe via the
- * returned state and React Flow nodes/edges are mutated downstream.
+ * with play / pause / step / reset controls and a speed multiplier.
+ * Components subscribe to the returned `state`; the React Flow canvas
+ * mutates node + edge styling downstream.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { Scenario } from './types';
+import type { AttackNode, Scenario } from './types';
 
 export type SimStatus = 'idle' | 'running' | 'paused' | 'done';
+export type SimSpeed = 0.5 | 1 | 2;
 
 export interface SimulationState {
   status: SimStatus;
@@ -20,9 +22,11 @@ export interface SimulationState {
   current: string | null;
   /** Edge ids currently lit on the attack path. */
   activeEdges: Set<string>;
+  /** Playback speed multiplier. */
+  speed: SimSpeed;
 }
 
-const STEP_INTERVAL_MS = 900;
+const BASE_INTERVAL_MS = 1100;
 
 export function useAttackSimulation(scenario: Scenario) {
   const [state, setState] = useState<SimulationState>(() => initial());
@@ -31,7 +35,7 @@ export function useAttackSimulation(scenario: Scenario) {
   // Reset whenever the scenario changes.
   useEffect(() => {
     clearTimer(timerRef);
-    setState(initial());
+    setState((prev) => ({ ...initial(), speed: prev.speed }));
   }, [scenario.id]);
 
   const stepOnce = useCallback(() => {
@@ -39,7 +43,9 @@ export function useAttackSimulation(scenario: Scenario) {
   }, [scenario]);
 
   const play = useCallback(() => {
-    setState((prev) => ({ ...prev, status: 'running' }));
+    setState((prev) =>
+      prev.status === 'done' ? prev : { ...prev, status: 'running' },
+    );
   }, []);
 
   const pause = useCallback(() => {
@@ -50,7 +56,11 @@ export function useAttackSimulation(scenario: Scenario) {
 
   const reset = useCallback(() => {
     clearTimer(timerRef);
-    setState(initial());
+    setState((prev) => ({ ...initial(), speed: prev.speed }));
+  }, []);
+
+  const setSpeed = useCallback((speed: SimSpeed) => {
+    setState((prev) => ({ ...prev, speed }));
   }, []);
 
   // Driver loop — only ticks while running.
@@ -58,14 +68,15 @@ export function useAttackSimulation(scenario: Scenario) {
     clearTimer(timerRef);
     if (state.status !== 'running') return;
     if (state.stepIndex >= scenario.path.length) return;
-    timerRef.current = window.setTimeout(stepOnce, STEP_INTERVAL_MS);
+    const delay = Math.max(150, BASE_INTERVAL_MS / state.speed);
+    timerRef.current = window.setTimeout(stepOnce, delay);
     return () => clearTimer(timerRef);
-  }, [state.status, state.stepIndex, scenario.path.length, stepOnce]);
+  }, [state.status, state.stepIndex, state.speed, scenario.path.length, stepOnce]);
 
   // Cleanup on unmount.
   useEffect(() => () => clearTimer(timerRef), []);
 
-  return { state, play, pause, reset, stepOnce };
+  return { state, play, pause, reset, stepOnce, setSpeed };
 }
 
 function initial(): SimulationState {
@@ -75,6 +86,7 @@ function initial(): SimulationState {
     visited: new Set(),
     current: null,
     activeEdges: new Set(),
+    speed: 1,
   };
 }
 
@@ -87,8 +99,7 @@ function advance(prev: SimulationState, scenario: Scenario): SimulationState {
   const visited = new Set(prev.visited);
   visited.add(nextId);
 
-  // Light the edge connecting the previous node to this one (if it exists
-  // on the canonical path).
+  // Light the edge from the previous step on the canonical path.
   const activeEdges = new Set(prev.activeEdges);
   if (prev.current) {
     const edge = scenario.edges.find(
@@ -102,6 +113,7 @@ function advance(prev: SimulationState, scenario: Scenario): SimulationState {
     nextStep >= scenario.path.length ? 'done' : prev.status;
 
   return {
+    ...prev,
     status,
     stepIndex: nextStep,
     visited,
@@ -118,13 +130,49 @@ function clearTimer(ref: React.MutableRefObject<number | null>) {
 }
 
 /* ------------------------------------------------------------------ */
+/* Derived helpers — used by the UI rails.                             */
+/* ------------------------------------------------------------------ */
+
+export interface CurrentStepInfo {
+  /** 1-based step number. */
+  index: number;
+  total: number;
+  node: AttackNode | null;
+  /** Optional friendly stage label from the scenario. */
+  stageLabel?: string;
+  /** Hint of the next node on the path (for "what comes next"). */
+  next: AttackNode | null;
+}
+
+/** Compute live step info from sim state + scenario. */
+export function useCurrentStep(
+  scenario: Scenario,
+  state: SimulationState,
+): CurrentStepInfo {
+  return useMemo(() => {
+    const total = scenario.path.length;
+    const currentIdx = state.current ? scenario.path.indexOf(state.current) : -1;
+    const node = state.current
+      ? scenario.nodes.find((n) => n.id === state.current) ?? null
+      : null;
+    const nextId =
+      currentIdx >= 0 && currentIdx + 1 < total ? scenario.path[currentIdx + 1] : null;
+    const next = nextId ? scenario.nodes.find((n) => n.id === nextId) ?? null : null;
+    return {
+      index: currentIdx + 1,
+      total,
+      node,
+      stageLabel: currentIdx >= 0 ? scenario.stageLabels?.[currentIdx] : undefined,
+      next,
+    };
+  }, [scenario, state.current]);
+}
+
+/* ------------------------------------------------------------------ */
 /* Probability helpers — used by the risk-breakdown panel.             */
 /* ------------------------------------------------------------------ */
 
-/**
- * Multiply all edge probabilities along the canonical attack path.
- * Represents the rough chance an unprotected target falls all the way.
- */
+/** Multiply all edge probabilities along the canonical attack path. */
 export function chainProbability(scenario: Scenario): number {
   let p = 1;
   for (let i = 0; i < scenario.path.length - 1; i++) {
@@ -140,8 +188,9 @@ export function chainProbability(scenario: Scenario): number {
 export function weakestLink(scenario: Scenario):
   | { edgeId: string; source: string; target: string; probability: number }
   | null {
-  let weakest: { edgeId: string; source: string; target: string; probability: number } | null =
-    null;
+  let weakest:
+    | { edgeId: string; source: string; target: string; probability: number }
+    | null = null;
   for (let i = 0; i < scenario.path.length - 1; i++) {
     const src = scenario.path[i];
     const tgt = scenario.path[i + 1];
@@ -159,21 +208,10 @@ export function weakestLink(scenario: Scenario):
   return weakest;
 }
 
-/** Used by the breakdown panel to render percentages succinctly. */
+/** Render percentages succinctly for the UI. */
 export function formatPct(p: number): string {
   if (p <= 0) return '0%';
   if (p < 0.005) return '<1%';
   if (p > 0.995) return '>99%';
   return `${Math.round(p * 100)}%`;
-}
-
-/** Stable list of unique nodes on the path (preserves order). */
-export function usePathNodes(scenario: Scenario) {
-  return useMemo(
-    () =>
-      scenario.path
-        .map((id) => scenario.nodes.find((n) => n.id === id))
-        .filter((n): n is NonNullable<typeof n> => !!n),
-    [scenario],
-  );
 }

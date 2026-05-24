@@ -5,9 +5,9 @@ import { KIND_META, SEVERITY_COLOR, type AttackNodeData } from '@/lib/attack-pat
 import { KIND_ICONS } from './icons';
 
 /**
- * Unified attack-graph node.  Every node kind shares a single component
- * so visual rhythm stays consistent — only the accent colour, icon, and
- * eyebrow change.
+ * Unified attack-graph node.  Every kind shares the same shell so visual
+ * rhythm stays consistent — only the accent color, icon, and eyebrow
+ * change.  Idle / visited / active states are driven by the simulation.
  */
 function AttackNodeImpl({ data, selected }: NodeProps<AttackNodeData>) {
   const meta = KIND_META[data.kind];
@@ -17,60 +17,58 @@ function AttackNodeImpl({ data, selected }: NodeProps<AttackNodeData>) {
   const isActive = state === 'active';
   const isVisited = state === 'visited' || isActive;
 
-  // Container styles change subtly across idle / visited / active.
+  // Border / background palette varies subtly across states.
   const borderColor = isActive
     ? meta.color
     : isVisited
       ? `${meta.color}88`
       : selected
-        ? '#2c2e34'
+        ? '#5e6ad2aa'
         : '#23252a';
 
-  const background = isVisited ? `${meta.tint}` : 'rgba(10, 10, 13, 0.9)';
+  const background = isActive
+    ? `linear-gradient(180deg, ${meta.tint}, rgba(10,10,13,0.92))`
+    : isVisited
+      ? meta.tint
+      : 'rgba(10, 10, 13, 0.86)';
+
+  const boxShadow = isActive
+    ? `0 0 0 1px ${meta.color}, 0 0 30px -2px ${meta.color}aa, 0 10px 30px -16px ${meta.color}99`
+    : selected
+      ? '0 0 0 1px #5e6ad2aa, 0 8px 28px -12px #5e6ad266'
+      : '0 1px 0 0 rgba(255,255,255,0.04), 0 8px 24px -18px rgba(0,0,0,0.6)';
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="group relative w-[230px] rounded-lg border backdrop-blur-md transition-colors"
+      className="group relative w-[240px] rounded-xl border backdrop-blur-md"
       style={{
         background,
         borderColor,
-        boxShadow: isActive
-          ? `0 0 0 1px ${meta.color}aa, 0 0 28px -4px ${meta.color}99`
-          : selected
-            ? '0 0 0 1px #5e6ad2aa, 0 6px 24px -10px #5e6ad244'
-            : '0 1px 0 0 rgba(255,255,255,0.04)',
+        boxShadow,
+        transition:
+          'border-color 240ms ease, box-shadow 240ms ease, background 240ms ease',
       }}
     >
-      {/* Handles — both sides so edges flow predictably. */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        style={handleStyle(meta.color, isVisited)}
-      />
-      <Handle
-        type="source"
-        position={Position.Right}
-        style={handleStyle(meta.color, isVisited)}
-      />
+      <Handle type="target" position={Position.Left} style={handleStyle(meta.color, isVisited)} />
+      <Handle type="source" position={Position.Right} style={handleStyle(meta.color, isVisited)} />
 
-      {/* Active pulse */}
       {isActive && (
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute -inset-1 rounded-xl"
+          className="pointer-events-none absolute -inset-1.5 rounded-2xl"
           style={{
             background: `radial-gradient(circle at 50% 50%, ${meta.color}33, transparent 65%)`,
           }}
-          animate={{ opacity: [0.5, 0.9, 0.5] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+          animate={{ opacity: [0.45, 0.85, 0.45] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
         />
       )}
 
       <div className="relative px-3.5 py-3">
-        {/* Header row */}
+        {/* Header row: kind chip + severity */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex min-w-0 items-center gap-2">
             <span
@@ -100,16 +98,18 @@ function AttackNodeImpl({ data, selected }: NodeProps<AttackNodeData>) {
         </div>
 
         {/* Title + short */}
-        <div className="mt-1.5">
-          <div className="truncate text-[13.5px] font-medium text-ink">{data.title}</div>
+        <div className="mt-2">
+          <div className="truncate text-[13.5px] font-medium leading-snug text-ink">
+            {data.title}
+          </div>
           <div className="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-ink-subtle">
             {data.short}
           </div>
         </div>
 
-        {/* Optional probability chip */}
+        {/* Optional success probability bar */}
         {typeof data.successProb === 'number' && (
-          <div className="mt-2 flex items-center gap-1.5">
+          <div className="mt-2.5 flex items-center gap-1.5">
             <div className="h-1 flex-1 overflow-hidden rounded-full bg-surface-3">
               <div
                 className="h-full rounded-full"
@@ -125,6 +125,13 @@ function AttackNodeImpl({ data, selected }: NodeProps<AttackNodeData>) {
           </div>
         )}
       </div>
+
+      {/* Hover affordance — subtle ring on the right edge */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-y-1 right-0 w-[2px] rounded-r opacity-0 transition-opacity group-hover:opacity-100"
+        style={{ background: `${meta.color}55` }}
+      />
     </motion.div>
   );
 }

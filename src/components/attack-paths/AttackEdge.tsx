@@ -5,20 +5,18 @@ import {
   getSmoothStepPath,
   type EdgeProps,
 } from 'reactflow';
-import type { AttackEdgeData } from '@/lib/attack-paths/types';
-
-interface AttackEdgeStyle {
-  /** Whether this edge is currently lit by the simulation. */
-  active?: boolean;
-}
+import type { AttackEdgeData, EdgeVariant } from '@/lib/attack-paths/types';
 
 /**
- * Custom edge — smooth-step path with an optional probability label and
- * an active/highlight state used by the simulation engine.
+ * Custom edge with semantic variants.
+ *
+ *   main      → solid neutral, becomes danger-red when the simulation lights it
+ *   alt       → faint, never lit (probabilistic deviation from the main path)
+ *   blocked   → dashed green-tinted, marks a barrier intercept
+ *   impact    → solid red fan-out from the compromised pivot node
+ *   recovery  → solid blue path to the recovery node
  */
-function AttackEdgeImpl(
-  props: EdgeProps<AttackEdgeData & AttackEdgeStyle>,
-) {
+function AttackEdgeImpl(props: EdgeProps<AttackEdgeData>) {
   const {
     sourceX,
     sourceY,
@@ -37,25 +35,28 @@ function AttackEdgeImpl(
     targetX,
     targetY,
     targetPosition,
-    borderRadius: 16,
+    borderRadius: 18,
   });
 
+  const variant: EdgeVariant = data?.variant ?? 'main';
   const active = Boolean(data?.active);
-  const stroke = active ? '#f04438' : '#2c2e34';
-  const width = active ? 2.2 : 1.4;
+  const v = visualFor(variant, active);
 
   return (
     <>
       <BaseEdge
         path={edgePath}
         style={{
-          stroke,
-          strokeWidth: width,
-          strokeDasharray: active ? '6 6' : undefined,
-          filter: active ? 'drop-shadow(0 0 6px #f0443866)' : undefined,
+          stroke: v.stroke,
+          strokeWidth: v.width,
+          strokeDasharray: v.dash,
+          opacity: v.opacity,
+          filter: v.glow,
+          transition:
+            'stroke 240ms ease, stroke-width 240ms ease, opacity 240ms ease, filter 240ms ease',
           ...styleProp,
         }}
-        markerEnd={active ? 'url(#attack-arrow-active)' : 'url(#attack-arrow)'}
+        markerEnd={v.marker}
       />
       {data?.label && (
         <EdgeLabelRenderer>
@@ -64,6 +65,7 @@ function AttackEdgeImpl(
               position: 'absolute',
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
               pointerEvents: 'none',
+              opacity: v.opacity,
             }}
             className="rounded border border-hairline bg-surface-2/90 px-1.5 py-0.5 font-mono text-[10px] text-ink-subtle backdrop-blur-sm"
           >
@@ -76,7 +78,7 @@ function AttackEdgeImpl(
           </div>
         </EdgeLabelRenderer>
       )}
-      {!data?.label && typeof data?.probability === 'number' && active && (
+      {!data?.label && active && typeof data?.probability === 'number' && (
         <EdgeLabelRenderer>
           <div
             style={{
@@ -86,12 +88,81 @@ function AttackEdgeImpl(
             }}
             className="rounded border border-danger/30 bg-surface-2/90 px-1.5 py-0.5 font-mono text-[10px] text-danger"
           >
-            {Math.round((data?.probability ?? 0) * 100)}%
+            {Math.round(data.probability * 100)}%
           </div>
         </EdgeLabelRenderer>
       )}
     </>
   );
+}
+
+interface EdgeVisual {
+  stroke: string;
+  width: number;
+  dash?: string;
+  opacity: number;
+  glow?: string;
+  marker: string;
+}
+
+function visualFor(variant: EdgeVariant, active: boolean): EdgeVisual {
+  switch (variant) {
+    case 'main':
+      return active
+        ? {
+            stroke: '#f04438',
+            width: 2.4,
+            dash: '6 6',
+            opacity: 1,
+            glow: 'drop-shadow(0 0 6px #f0443866)',
+            marker: 'url(#attack-arrow-active)',
+          }
+        : {
+            stroke: '#2c2e34',
+            width: 1.6,
+            opacity: 0.95,
+            marker: 'url(#attack-arrow)',
+          };
+    case 'alt':
+      return {
+        stroke: '#2c2e34',
+        width: 1.2,
+        dash: '3 5',
+        opacity: 0.45,
+        marker: 'url(#attack-arrow-mute)',
+      };
+    case 'blocked':
+      return {
+        stroke: '#27a644',
+        width: 1.6,
+        dash: '4 6',
+        opacity: 0.75,
+        marker: 'url(#attack-arrow-barrier)',
+      };
+    case 'impact':
+      return active
+        ? {
+            stroke: '#f04438',
+            width: 2,
+            opacity: 1,
+            glow: 'drop-shadow(0 0 6px #f0443866)',
+            marker: 'url(#attack-arrow-active)',
+          }
+        : {
+            stroke: '#d8341c',
+            width: 1.6,
+            opacity: 0.75,
+            marker: 'url(#attack-arrow-impact)',
+          };
+    case 'recovery':
+      return {
+        stroke: '#5e6ad2',
+        width: 1.6,
+        dash: '2 5',
+        opacity: 0.7,
+        marker: 'url(#attack-arrow-recovery)',
+      };
+  }
 }
 
 export const AttackEdge = memo(AttackEdgeImpl);

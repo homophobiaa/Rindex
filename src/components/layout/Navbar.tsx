@@ -8,7 +8,7 @@ import { cn } from '@/lib/cn';
 const navLinks = [
   { to: '/assessment', label: 'Assessment' },
   { to: '/password-lab', label: 'Password Lab' },
-  { to: '/risk-graph', label: 'Risk Graph' },
+  { to: '/risk-graph', label: 'Attack Paths' },
   { to: '/methodology', label: 'Methodology' },
 ];
 

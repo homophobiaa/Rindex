@@ -1,141 +1,150 @@
 import { motion } from 'framer-motion';
-import type { Scenario } from '@/lib/attack-paths/types';
-import type { SimulationState } from '@/lib/attack-paths/simulation';
-import { PauseIcon, PlayIcon, ResetIcon, StepIcon } from './nodes/icons';
+import type { SimSpeed, SimulationState, CurrentStepInfo } from '@/lib/attack-paths/simulation';
+import { PlayIcon, PauseIcon, StepIcon, ResetIcon } from './nodes/icons';
+import { cn } from '@/lib/cn';
 
 interface SimulationControlsProps {
-  scenario: Scenario;
-  simulation: SimulationState;
+  state: SimulationState;
+  step: CurrentStepInfo;
   onPlay: () => void;
   onPause: () => void;
   onStep: () => void;
   onReset: () => void;
+  onSetSpeed: (speed: SimSpeed) => void;
 }
 
+const SPEEDS: SimSpeed[] = [0.5, 1, 2];
+
 /**
- * Play / pause / step / reset controls for the attack-path simulation,
- * plus a progress strip showing how far through the chain we are.
+ * Floating simulation cockpit.  Lives at the bottom of the canvas, in a
+ * horizontal glass pill — transport + speed + progress + current-step
+ * banner all in one row.
  */
 export function SimulationControls({
-  scenario,
-  simulation,
+  state,
+  step,
   onPlay,
   onPause,
   onStep,
   onReset,
+  onSetSpeed,
 }: SimulationControlsProps) {
-  const total = scenario.path.length;
-  const done = simulation.stepIndex;
-  const pct = total > 0 ? Math.min(1, done / total) : 0;
-  const running = simulation.status === 'running';
-  const finished = simulation.status === 'done';
+  const playing = state.status === 'running';
+  const total = step.total;
+  const idx = step.index; // 1-based; 0 when not yet started
+  const shownIdx = Math.max(1, idx);
+  const progress = total > 1 ? Math.max(0, idx - 1) / (total - 1) : 0;
 
   return (
-    <div className="panel p-4 md:p-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <span className="text-eyebrow uppercase text-ink-subtle">Simulation</span>
-          <h3 className="mt-0.5 text-[15px] font-medium tracking-tight text-ink">
-            Walk the chain
-          </h3>
-        </div>
-        <span className="font-mono text-[11px] text-ink-tertiary">
-          {done}/{total}
-        </span>
-      </div>
-
-      {/* Progress strip */}
-      <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface-3">
+    <div className="pointer-events-auto flex flex-col items-stretch gap-2">
+      {/* Step banner */}
+      {step.node && (
         <motion.div
-          className="h-full rounded-full"
-          style={{
-            background: 'linear-gradient(90deg, #f04438, #f79009)',
-          }}
-          animate={{ width: `${pct * 100}%` }}
-          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        />
-      </div>
+          key={step.node.id + state.status}
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="mx-auto max-w-[640px] rounded-lg border border-hairline bg-surface-1/85 px-3.5 py-2 backdrop-blur-xl"
+        >
+          <div className="flex items-center gap-2.5">
+            <span className="font-mono text-[10px] tabular-nums text-ink-tertiary">
+              STAGE {String(shownIdx).padStart(2, '0')} / {String(total).padStart(2, '0')}
+            </span>
+            {step.stageLabel && (
+              <span className="text-[10px] font-medium uppercase tracking-wider text-primary">
+                {step.stageLabel}
+              </span>
+            )}
+            <span className="text-[12.5px] font-medium text-ink">{step.node.data.title}</span>
+          </div>
+          <p className="mt-0.5 line-clamp-1 text-[11.5px] text-ink-subtle">
+            {step.node.data.short}
+          </p>
+        </motion.div>
+      )}
 
-      {/* Buttons */}
-      <div className="mt-3 grid grid-cols-4 gap-1.5">
-        <ControlButton
-          label={running ? 'Pause' : finished ? 'Done' : 'Play'}
-          onClick={running ? onPause : onPlay}
-          disabled={finished}
+      {/* Transport pill */}
+      <div className="mx-auto flex items-center gap-2 rounded-full border border-hairline bg-surface-1/90 px-2 py-1.5 backdrop-blur-xl shadow-2xl">
+        <TransportButton
+          label={playing ? 'Pause' : 'Play'}
+          onClick={playing ? onPause : onPlay}
           primary
-          icon={running ? <PauseIcon /> : <PlayIcon />}
-        />
-        <ControlButton
-          label="Step"
-          onClick={onStep}
-          disabled={finished}
-          icon={<StepIcon />}
-        />
-        <ControlButton label="Reset" onClick={onReset} icon={<ResetIcon />} />
-        <StatusPill status={simulation.status} />
-      </div>
+        >
+          {playing ? <PauseIcon className="h-3.5 w-3.5" /> : <PlayIcon className="h-3.5 w-3.5" />}
+        </TransportButton>
 
-      <p className="mt-3 text-[11.5px] leading-snug text-ink-subtle">
-        Each step animates the attacker advancing one node along the canonical
-        attack path. Click any node to inspect it.
-      </p>
+        <TransportButton label="Step" onClick={onStep}>
+          <StepIcon className="h-3.5 w-3.5" />
+        </TransportButton>
+
+        <TransportButton label="Reset" onClick={onReset}>
+          <ResetIcon className="h-3.5 w-3.5" />
+        </TransportButton>
+
+        <span className="mx-1 h-5 w-px bg-hairline" />
+
+        {/* Progress */}
+        <div className="flex w-[180px] items-center gap-2">
+          <span className="font-mono text-[10px] tabular-nums text-ink-tertiary">
+            {String(shownIdx).padStart(2, '0')}/{String(total).padStart(2, '0')}
+          </span>
+          <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-surface-3">
+            <motion.div
+              className="absolute inset-y-0 left-0 rounded-full bg-danger"
+              animate={{ width: `${Math.max(4, progress * 100)}%` }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            />
+          </div>
+        </div>
+
+        <span className="mx-1 h-5 w-px bg-hairline" />
+
+        {/* Speed */}
+        <div className="flex items-center rounded-full bg-surface-2 p-0.5">
+          {SPEEDS.map((s) => (
+            <button
+              key={s}
+              type="button"
+              onClick={() => onSetSpeed(s)}
+              className={cn(
+                'rounded-full px-2 py-0.5 font-mono text-[10.5px] tabular-nums transition-colors',
+                state.speed === s
+                  ? 'bg-primary/90 text-white'
+                  : 'text-ink-tertiary hover:text-ink',
+              )}
+              aria-pressed={state.speed === s}
+            >
+              {s}x
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
-function ControlButton({
-  label,
-  onClick,
-  disabled,
-  icon,
-  primary,
-}: {
-  label: string;
+interface TransportButtonProps {
   onClick: () => void;
-  disabled?: boolean;
-  icon: React.ReactNode;
+  label: string;
   primary?: boolean;
-}) {
+  children: React.ReactNode;
+}
+
+function TransportButton({ onClick, label, primary, children }: TransportButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled}
-      className={
-        primary
-          ? 'inline-flex h-9 items-center justify-center gap-1.5 rounded-md bg-primary text-[12px] font-medium text-white shadow-glow-soft transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50'
-          : 'inline-flex h-9 items-center justify-center gap-1.5 rounded-md border border-hairline bg-surface-2 text-[12px] font-medium text-ink-muted transition-colors hover:border-hairline-strong hover:text-ink disabled:cursor-not-allowed disabled:opacity-50'
-      }
       aria-label={label}
+      title={label}
+      className={cn(
+        'grid h-8 w-8 place-items-center rounded-full transition-colors',
+        primary
+          ? 'bg-primary text-white shadow-[0_0_18px_-6px_#5e6ad2cc] hover:bg-primary/90'
+          : 'text-ink-subtle hover:bg-surface-2 hover:text-ink',
+      )}
     >
-      <span className="h-3.5 w-3.5">{icon}</span>
-      <span className="hidden sm:inline">{label}</span>
+      {children}
     </button>
-  );
-}
-
-function StatusPill({ status }: { status: SimulationState['status'] }) {
-  const map: Record<SimulationState['status'], { label: string; color: string }> = {
-    idle: { label: 'Idle', color: '#62666d' },
-    running: { label: 'Running', color: '#27a644' },
-    paused: { label: 'Paused', color: '#f79009' },
-    done: { label: 'Done', color: '#5e6ad2' },
-  };
-  const meta = map[status];
-  return (
-    <div
-      className="inline-flex h-9 items-center justify-center gap-1.5 rounded-md border text-[11px] font-medium uppercase tracking-wider"
-      style={{
-        borderColor: `${meta.color}33`,
-        background: `${meta.color}14`,
-        color: meta.color,
-      }}
-    >
-      <span
-        className="inline-block h-1.5 w-1.5 rounded-full"
-        style={{ background: meta.color }}
-      />
-      {meta.label}
-    </div>
   );
 }

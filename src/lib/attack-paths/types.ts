@@ -43,7 +43,17 @@ export interface AttackNodeData {
   successProb?: number;
   /** Runtime simulation state. Mutated by the engine. */
   state?: NodeState;
+  /** Which phase / lane this node belongs to (drives the lane backdrop). */
+  phase?: string;
 }
+
+/** Visual + semantic category of an edge. */
+export type EdgeVariant =
+  | 'main' // the canonical attack path
+  | 'alt' // a less-likely branch from the same source
+  | 'blocked' // attack path stopped by a barrier (dashed, dimmed)
+  | 'impact' // pivot fan-out after the main compromise
+  | 'recovery'; // path to the recovery / mitigation node
 
 /** Data on each directed edge between attack-graph nodes. */
 export interface AttackEdgeData {
@@ -51,10 +61,24 @@ export interface AttackEdgeData {
   probability: number;
   /** Optional short label rendered on the edge ("if reused", "via OTP", …). */
   label?: string;
+  /** Visual + semantic category (defaults to 'main'). */
+  variant?: EdgeVariant;
+  /** Runtime flag set by the simulation. Not used at authoring time. */
+  active?: boolean;
 }
 
 export type AttackNode = Node<AttackNodeData>;
 export type AttackEdge = Edge<AttackEdgeData>;
+
+/** A phase / lane definition used to render the column backdrop. */
+export interface ScenarioPhase {
+  id: string;
+  label: string;
+  /** Left-edge x coordinate of the lane in graph-space. */
+  x: number;
+  /** Lane width in graph-space. */
+  width: number;
+}
 
 export interface Scenario {
   id: string;
@@ -67,6 +91,10 @@ export interface Scenario {
   edges: AttackEdge[];
   /** Ordered list of node ids that form the canonical attack path. */
   path: string[];
+  /** Lane definitions for the phase backdrop / column headers. */
+  phases: ScenarioPhase[];
+  /** Short, scannable attack-stage names (one per canonical step). */
+  stageLabels?: string[];
 }
 
 /* ------------------------------------------------------------------ */

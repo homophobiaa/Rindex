@@ -1,158 +1,166 @@
-import { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { ReactFlowProvider } from 'reactflow';
+import { motion } from 'framer-motion';
 
-import { SCENARIOS, getScenario } from '@/lib/attack-paths/scenarios';
-import { useAttackSimulation } from '@/lib/attack-paths/simulation';
 import { AttackGraph } from '@/components/attack-paths/AttackGraph';
-import { DetailsPanel } from '@/components/attack-paths/DetailsPanel';
-import { RiskBreakdown } from '@/components/attack-paths/RiskBreakdown';
 import { ScenarioSelector } from '@/components/attack-paths/ScenarioSelector';
 import { SimulationControls } from '@/components/attack-paths/SimulationControls';
-import { KIND_META, type NodeKind } from '@/lib/attack-paths/types';
+import { DetailsPanel } from '@/components/attack-paths/DetailsPanel';
+import { RiskBreakdown } from '@/components/attack-paths/RiskBreakdown';
+import {
+  SCENARIOS,
+  getScenario,
+} from '@/lib/attack-paths/scenarios';
+import {
+  useAttackSimulation,
+  useCurrentStep,
+} from '@/lib/attack-paths/simulation';
+
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 /**
- * Attack Path Visualizer — the second major RIndex module.
+ * Attack Path Visualizer.
  *
- * Shows how isolated weaknesses chain into full account / device
- * compromise.  Built around a React Flow canvas, a small simulation
- * engine, and a scenario library so new chains can be added cheaply.
+ * Full-viewport canvas workspace.  The graph is the product — every
+ * supporting surface is a floating, collapsible overlay so it never
+ * suffocates the visualization.
  */
 export default function RiskGraph() {
-  const [scenarioId, setScenarioId] = useState(SCENARIOS[0].id);
+  const [scenarioId, setScenarioId] = useState<string>(SCENARIOS[0].id);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
-  const scenario = useMemo(() => getScenario(scenarioId), [scenarioId]);
-  const { state: simulation, play, pause, reset, stepOnce } = useAttackSimulation(scenario);
+  const scenario = getScenario(scenarioId);
+  const { state: simulation, play, pause, reset, stepOnce, setSpeed } =
+    useAttackSimulation(scenario);
+  const currentStep = useCurrentStep(scenario, simulation);
 
-  // Clear node selection whenever the scenario changes so the right rail
-  // resets to the new scenario overview.
+  // Drop stale selection when the scenario changes.
   useEffect(() => {
     setSelectedNodeId(null);
   }, [scenarioId]);
 
   return (
-    <main className="relative pt-28 pb-section">
-      {/* Ambient backdrop */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute -top-32 left-1/2 h-[520px] w-[820px] -translate-x-1/2 rounded-full bg-radial-fade opacity-70 blur-3xl" />
-        <div className="absolute inset-0 bg-grid-fade opacity-[0.07] [background-size:48px_48px] mask-fade-edges" />
-      </div>
+    <main className="relative h-[calc(100vh-72px)] w-full overflow-hidden bg-canvas">
+      {/* Subtle ambient gradient — keeps the canvas from feeling sterile */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-radial-fade opacity-60"
+      />
 
-      <div className="container-rindex">
-        {/* Hero */}
-        <motion.header
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto max-w-3xl text-center"
-        >
-          <span className="eyebrow">Attack Path Visualizer</span>
-          <h1 className="mt-3 text-display-lg text-gradient">
-            Security failures are chains, not single mistakes.
-          </h1>
-          <p className="mt-4 text-body-lg text-ink-subtle">
-            Pick a scenario and watch how attackers traverse a graph of small weaknesses
-            until something important falls. Every step runs in your browser — no data
-            ever leaves this page.
-          </p>
-        </motion.header>
-
-        {/* Workspace */}
-        <div className="mt-10 grid gap-5 lg:grid-cols-12">
-          {/* LEFT rail */}
-          <aside className="flex flex-col gap-5 lg:col-span-3">
-            <ScenarioSelector
-              scenarios={SCENARIOS}
-              activeId={scenarioId}
-              onSelect={setScenarioId}
-            />
-            <SimulationControls
+      {/* Workspace: graph on the left, collapsible drawer on the right */}
+      <div className="relative flex h-full w-full">
+        <section className="relative h-full min-w-0 flex-1">
+          <ReactFlowProvider>
+            <AttackGraph
               scenario={scenario}
               simulation={simulation}
+              selectedNodeId={selectedNodeId}
+              onSelectNode={setSelectedNodeId}
+            />
+          </ReactFlowProvider>
+
+          {/* Top-left overlay — scenario picker + header */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: EASE }}
+            className="pointer-events-none absolute left-4 top-4 z-10 flex max-w-[calc(100%-2rem)] flex-col gap-2"
+          >
+            <div className="pointer-events-auto">
+              <ScenarioSelector
+                scenarios={SCENARIOS}
+                activeId={scenarioId}
+                onSelect={setScenarioId}
+              />
+            </div>
+            <div className="pointer-events-none ml-1 max-w-[420px]">
+              <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+                Attack Path Visualizer
+              </div>
+              <p className="mt-0.5 text-[12px] leading-snug text-ink-subtle">
+                {scenario.tagline}
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Bottom-left overlay — risk breakdown */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: EASE, delay: 0.05 }}
+            className="pointer-events-auto absolute bottom-4 left-4 z-10"
+          >
+            <RiskBreakdown scenario={scenario} />
+          </motion.div>
+
+          {/* Bottom-center overlay — simulation cockpit */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: EASE, delay: 0.1 }}
+            className="pointer-events-none absolute inset-x-0 bottom-4 z-10 flex justify-center px-4"
+          >
+            <SimulationControls
+              state={simulation}
+              step={currentStep}
               onPlay={play}
               onPause={pause}
               onStep={stepOnce}
               onReset={reset}
+              onSetSpeed={setSpeed}
             />
-            <RiskBreakdown scenario={scenario} />
-          </aside>
+          </motion.div>
 
-          {/* CENTER canvas */}
-          <section className="lg:col-span-6">
-            <ReactFlowProvider>
-              <AttackGraph
-                scenario={scenario}
-                simulation={simulation}
-                selectedNodeId={selectedNodeId}
-                onSelectNode={setSelectedNodeId}
-              />
-            </ReactFlowProvider>
+          {/* Legend pill — top right of canvas area */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: EASE, delay: 0.05 }}
+            className="pointer-events-auto absolute right-4 top-4 z-10"
+          >
             <Legend />
-          </section>
+          </motion.div>
+        </section>
 
-          {/* RIGHT details */}
-          <aside className="lg:col-span-3">
-            <div className="sticky top-24">
-              <DetailsPanel scenario={scenario} selectedNodeId={selectedNodeId} />
-            </div>
-          </aside>
-        </div>
-
-        {/* Educational footer */}
-        <div className="mx-auto mt-12 max-w-5xl">
-          <div className="panel-glass gradient-border grid gap-5 p-6 md:grid-cols-3 md:p-7">
-            <EduCard
-              title="Graph theory"
-              body="Every scenario is a directed graph. Nodes are states, edges are transitions. The attacker's job is to traverse from an entry node to a goal."
-            />
-            <EduCard
-              title="Probability"
-              body="Edges carry weights. The chance the chain succeeds end-to-end is roughly the product of those weights — break one and the whole chain collapses."
-            />
-            <EduCard
-              title="Weakest-link"
-              body="Total risk is dominated by the lowest-probability edge. That's the highest-leverage place to add a control."
-            />
-          </div>
-        </div>
+        {/* Right drawer — node inspector + scenario overview */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.45, ease: EASE }}
+          className="relative z-20 h-full"
+        >
+          <DetailsPanel
+            scenario={scenario}
+            selectedNodeId={selectedNodeId}
+            currentStep={currentStep}
+          />
+        </motion.div>
       </div>
     </main>
   );
 }
 
+/* ------------------------------------------------------------------ */
+
 function Legend() {
-  const order: NodeKind[] = [
-    'mistake',
-    'vulnerability',
-    'attacker',
-    'barrier',
-    'compromised',
-    'recovery',
+  const items: { color: string; label: string }[] = [
+    { color: '#f04438', label: 'Active path' },
+    { color: '#2c2e34', label: 'Possible step' },
+    { color: '#27a644', label: 'Barrier (blocked)' },
+    { color: '#d8341c', label: 'Impact' },
+    { color: '#5e6ad2', label: 'Recovery' },
   ];
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 px-1 text-[11px] text-ink-subtle">
-      {order.map((k) => {
-        const meta = KIND_META[k];
-        return (
-          <span key={k} className="inline-flex items-center gap-1.5">
-            <span
-              className="inline-block h-1.5 w-1.5 rounded-full"
-              style={{ background: meta.color }}
-            />
-            {meta.label}
-          </span>
-        );
-      })}
-    </div>
-  );
-}
-
-function EduCard({ title, body }: { title: string; body: string }) {
-  return (
-    <div>
-      <div className="text-eyebrow uppercase text-ink-subtle">{title}</div>
-      <p className="mt-1.5 text-body-sm text-ink-muted">{body}</p>
+    <div className="flex items-center gap-3 rounded-lg border border-hairline bg-surface-1/85 px-3 py-2 backdrop-blur-xl">
+      {items.map((it) => (
+        <div key={it.label} className="flex items-center gap-1.5">
+          <span
+            className="inline-block h-[3px] w-5 rounded-full"
+            style={{ background: it.color }}
+          />
+          <span className="text-[10.5px] text-ink-tertiary">{it.label}</span>
+        </div>
+      ))}
     </div>
   );
 }

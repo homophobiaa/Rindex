@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { Scenario } from '@/lib/attack-paths/types';
 import { cn } from '@/lib/cn';
 
@@ -9,69 +10,122 @@ interface ScenarioSelectorProps {
 }
 
 /**
- * Vertical list of scenarios.  Each card shows the title, tagline and
- * a small accent strip on the left.
+ * Floating scenario selector — collapsed to a compact pill by default,
+ * expands to a vertical list on click.  Designed to live in the top-left
+ * corner of the canvas without dominating the layout.
  */
 export function ScenarioSelector({
   scenarios,
   activeId,
   onSelect,
 }: ScenarioSelectorProps) {
-  return (
-    <div className="panel p-4 md:p-5">
-      <div className="flex items-center justify-between">
-        <div>
-          <span className="text-eyebrow uppercase text-ink-subtle">Scenario</span>
-          <h3 className="mt-0.5 text-[15px] font-medium tracking-tight text-ink">
-            Pick an attack chain
-          </h3>
-        </div>
-        <span className="rounded-md border border-hairline-tertiary bg-surface-2 px-2 py-0.5 font-mono text-[11px] text-ink-tertiary">
-          {scenarios.length}
-        </span>
-      </div>
+  const [open, setOpen] = useState(false);
+  const active = scenarios.find((s) => s.id === activeId) ?? scenarios[0];
 
-      <ul className="mt-3 grid gap-1.5">
-        {scenarios.map((s) => {
-          const active = s.id === activeId;
-          return (
-            <li key={s.id}>
-              <button
-                type="button"
-                onClick={() => onSelect(s.id)}
-                className={cn(
-                  'group relative flex w-full items-start gap-3 rounded-md border px-3 py-2.5 text-left transition-colors',
-                  active
-                    ? 'border-primary/40 bg-primary/10'
-                    : 'border-hairline-tertiary bg-surface-2/40 hover:border-hairline-strong hover:bg-surface-2',
-                )}
-              >
-                <span
-                  aria-hidden
-                  className={cn(
-                    'mt-1 inline-block h-2 w-2 shrink-0 rounded-full transition-colors',
-                    active ? 'bg-primary' : 'bg-ink-tertiary group-hover:bg-ink-subtle',
-                  )}
-                />
-                <span className="min-w-0 flex-1">
-                  <span className="block text-[13.5px] font-medium leading-tight text-ink">
-                    {s.title}
-                  </span>
-                  <span className="mt-0.5 block text-[11.5px] leading-snug text-ink-subtle">
-                    {s.tagline}
-                  </span>
-                </span>
-                {active && (
-                  <motion.span
-                    layoutId="scenario-pip"
-                    className="absolute inset-y-1 left-0 w-[2px] rounded-r bg-primary"
-                  />
-                )}
-              </button>
-            </li>
-          );
-        })}
-      </ul>
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className={cn(
+          'flex items-center gap-2.5 rounded-lg border border-hairline bg-surface-1/85 px-3 py-2 backdrop-blur-xl transition-colors hover:border-hairline-strong',
+          open && 'border-hairline-strong',
+        )}
+        aria-expanded={open}
+      >
+        <span className="flex h-5 w-5 items-center justify-center rounded-md bg-primary/15 text-primary">
+          <Dot />
+        </span>
+        <span className="flex flex-col items-start leading-tight">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+            Scenario
+          </span>
+          <span className="text-[12.5px] font-medium text-ink">{active.title}</span>
+        </span>
+        <Chevron open={open} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.ul
+            initial={{ opacity: 0, y: -6, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.98 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+            className="absolute left-0 top-[calc(100%+8px)] z-20 w-[300px] rounded-lg border border-hairline bg-surface-1/95 p-1.5 shadow-2xl backdrop-blur-xl"
+          >
+            {scenarios.map((s) => {
+              const isActive = s.id === activeId;
+              return (
+                <li key={s.id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSelect(s.id);
+                      setOpen(false);
+                    }}
+                    className={cn(
+                      'group relative flex w-full items-start gap-2.5 rounded-md px-2.5 py-2 text-left transition-colors',
+                      isActive
+                        ? 'bg-primary/10 text-ink'
+                        : 'text-ink-muted hover:bg-surface-2 hover:text-ink',
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        'mt-1 inline-block h-1.5 w-1.5 shrink-0 rounded-full',
+                        isActive ? 'bg-primary' : 'bg-ink-tertiary',
+                      )}
+                    />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-[12.5px] font-medium leading-tight">
+                        {s.title}
+                      </span>
+                      <span className="mt-0.5 block text-[11px] leading-snug text-ink-subtle">
+                        {s.tagline}
+                      </span>
+                    </span>
+                    {isActive && (
+                      <motion.span
+                        layoutId="scenario-active-pip"
+                        className="absolute inset-y-1 left-0 w-[2px] rounded-r bg-primary"
+                      />
+                    )}
+                  </button>
+                </li>
+              );
+            })}
+          </motion.ul>
+        )}
+      </AnimatePresence>
     </div>
+  );
+}
+
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={cn(
+        'ml-1 h-3.5 w-3.5 text-ink-tertiary transition-transform',
+        open && 'rotate-180',
+      )}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  );
+}
+
+function Dot() {
+  return (
+    <span
+      className="inline-block h-2 w-2 rounded-full bg-primary shadow-[0_0_6px_2px_rgba(94,106,210,0.4)]"
+      aria-hidden
+    />
   );
 }
