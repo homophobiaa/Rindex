@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   STEPS,
@@ -8,6 +8,7 @@ import {
   type QuestionOption,
 } from '@/lib/profile';
 import { defaultFactorState, type FactorState } from '@/lib/risk';
+import { useProfile } from '@/store/profile';
 import { ProgressTrack } from './ProgressTrack';
 import { LiveScorePanel } from './LiveScorePanel';
 import { LiveInsights } from './LiveInsights';
@@ -41,6 +42,7 @@ export function ProfilerFlow() {
   const [factorState, setFactorState] = useState<FactorState>(() => defaultFactorState());
   const [cursor, setCursor] = useState<Cursor>({ step: 0, question: 0 });
   const [answers, setAnswers] = useState<Record<string, string>>({});
+  const { setResult } = useProfile();
 
   const answeredCount = Object.keys(answers).length;
 
@@ -49,6 +51,18 @@ export function ProfilerFlow() {
       step.questions.reduce((n, q) => n + (answers[q.id] ? 1 : 0), 0),
     );
   }, [answers]);
+
+  // When the flow reaches the result phase, snapshot the completed profile
+  // into the shared in-memory store so the Unified Risk Dashboard can read
+  // it. Runs on entering 'result' with the final, fully-patched state.
+  useEffect(() => {
+    if (phase !== 'result') return;
+    setResult({
+      state: factorState,
+      answeredCount,
+      totalQuestions: TOTAL_QUESTIONS,
+    });
+  }, [phase, factorState, answeredCount, setResult]);
 
   /** Advance to the next question or step. End -> result phase. */
   const advance = () => {

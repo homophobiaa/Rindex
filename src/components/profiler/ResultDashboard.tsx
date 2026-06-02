@@ -236,10 +236,10 @@ export function ResultDashboard({
           Run it again
         </button>
         <Link
-          to="/risk-graph"
+          to="/dashboard"
           className="rounded-full border border-primary/40 bg-primary/15 px-5 py-2.5 text-[13px] text-ink shadow-glow-soft transition-colors hover:bg-primary/25"
         >
-          Explore your attack paths →
+          Open your security dashboard →
         </Link>
         <Link
           to="/methodology"

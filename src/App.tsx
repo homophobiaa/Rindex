@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Home from '@/pages/Home';
+import Dashboard from '@/pages/Dashboard';
 import Assessment from '@/pages/Assessment';
 import PasswordLab from '@/pages/PasswordLab';
 import RiskGraph from '@/pages/RiskGraph';
@@ -18,6 +19,7 @@ export default function App() {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/assessment" element={<Assessment />} />
           <Route path="/password-lab" element={<PasswordLab />} />
           <Route path="/risk-graph" element={<RiskGraph />} />
