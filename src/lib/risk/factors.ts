@@ -1,14 +1,24 @@
 /**
- * Risk factors — discrete toggleable conditions that move the RiskIndex.
+ * Risk factors — Scoring Engine v2.
  *
- * A factor is either:
- *   • protective  (kind: 'protective')  — being on reduces risk
- *   • threat      (kind: 'threat')      — being on increases risk
+ * Each factor is a discrete, toggleable condition that contributes to one
+ * pillar's risk score.  Two kinds:
  *
- * Each factor declares a `delta` (in raw RiskIndex points, 0..100 scale)
- * and the pillar it influences. The scoring engine (scoring.ts) consumes
- * the same shape used by the future Personal Risk Profiler — there is no
- * page-local logic.
+ *   threat     — when active, this condition RAISES pillar risk.
+ *   protective — when active, this condition LOWERS pillar risk.
+ *
+ * The `delta` is the raw contribution within the pillar's 0-100 band.
+ * Per-pillar normalization in scoring.ts converts the raw sum to a
+ * 0-100 score — meaning the score range is always meaningful and the
+ * model is trivially explainable:
+ *
+ *   "password reuse (delta 28) out of a max possible threat load of 54
+ *    puts your password pillar at 74% — here's what closes the gap."
+ *
+ * Weights were calibrated so:
+ *   very secure user   →  composite  ~5–15
+ *   average user       →  composite  ~45–60
+ *   very risky user    →  composite  ~85–98
  */
 
 import type { PillarId } from './pillars';
@@ -21,112 +31,255 @@ export interface Factor {
   description: string;
   pillar: PillarId;
   kind: FactorKind;
-  /** Raw impact on the 0..100 RiskIndex. Threats add, protectives subtract. */
+  /**
+   * Raw contribution within the pillar's normalized band (not global score).
+   * Threats add this to pillar raw when active.
+   * Protectives subtract this from pillar raw when active.
+   */
   delta: number;
-  /** Optional default state used by the live demo. */
-  defaultOn?: boolean;
 }
 
-export const FACTORS: Factor[] = [
-  // Protective layers
-  {
-    id: 'hardware-key',
-    label: 'Hardware security key',
-    description: 'FIDO2/WebAuthn device for phishing-resistant 2FA.',
-    pillar: 'barriers',
-    kind: 'protective',
-    delta: 14,
-  },
-  {
-    id: 'password-manager',
-    label: 'Uses a password manager',
-    description: 'Generates and stores unique high-entropy passwords.',
-    pillar: 'barriers',
-    kind: 'protective',
-    delta: 10,
-    defaultOn: true,
-  },
-  {
-    id: 'unique-passwords',
-    label: 'Unique password per account',
-    description: 'No credential reuse across services.',
-    pillar: 'password',
-    kind: 'protective',
-    delta: 9,
-  },
-  {
-    id: 'backup-codes',
-    label: 'Backup codes stored safely',
-    description: 'Offline recovery without relying on SMS.',
-    pillar: 'recovery',
-    kind: 'protective',
-    delta: 5,
-  },
-  {
-    id: 'device-encryption',
-    label: 'Device encryption enabled',
-    description: 'FileVault / BitLocker / LUKS active.',
-    pillar: 'barriers',
-    kind: 'protective',
-    delta: 4,
-  },
+/* ------------------------------------------------------------------ */
+/* Password Security                                                   */
+/* ------------------------------------------------------------------ */
+// maxThreat = 28+8+18 = 54   maxProtect = 28+18 = 46   span = 100
 
-  // Threats
+export const FACTORS: Factor[] = [
+  /* — Threats — */
   {
-    id: 'reused-password',
+    id: 'pw-reuse',
     label: 'Reuses passwords',
-    description: 'Same password used on multiple sites.',
+    description: 'Same or very similar password used across multiple sites.',
     pillar: 'password',
     kind: 'threat',
-    delta: 16,
+    delta: 28,
   },
   {
-    id: 'sms-2fa-only',
-    label: 'SMS-only 2FA',
-    description: 'Vulnerable to SIM-swap attacks.',
-    pillar: 'recovery',
+    id: 'pw-browser-only',
+    label: 'Browser-saved passwords only',
+    description: 'Relies on browser autofill rather than a dedicated vault.',
+    pillar: 'password',
     kind: 'threat',
     delta: 8,
   },
   {
-    id: 'public-email',
-    label: 'Primary email publicly visible',
-    description: 'Posted on social profiles, GitHub, resume.',
-    pillar: 'surface',
+    id: 'pw-weak',
+    label: 'Consistently weak passwords',
+    description: 'Short, simple, or predictable passwords on important accounts.',
+    pillar: 'password',
     kind: 'threat',
-    delta: 6,
+    delta: 18,
+  },
+
+  /* — Protectives — */
+  {
+    id: 'pw-manager',
+    label: 'Uses a password manager',
+    description: 'Dedicated vault (Bitwarden, 1Password, KeePass, etc.) generates and stores credentials.',
+    pillar: 'password',
+    kind: 'protective',
+    delta: 28,
   },
   {
-    id: 'public-wifi',
-    label: 'Uses public Wi-Fi without VPN',
-    description: 'Untrusted networks in cafés, airports, hotels.',
-    pillar: 'behavior',
+    id: 'pw-unique',
+    label: 'Unique passwords per account',
+    description: 'No shared credentials — each service has its own password.',
+    pillar: 'password',
+    kind: 'protective',
+    delta: 18,
+  },
+
+  /* ---------------------------------------------------------------- */
+  /* Authentication Barriers                                          */
+  /* maxThreat = 45+14 = 59   maxProtect = 16+28 = 44   span = 103   */
+  /* ---------------------------------------------------------------- */
+
+  /* — Threats — */
+  {
+    id: 'mfa-none',
+    label: 'No second factor (password only)',
+    description: 'Important accounts are protected by a password alone.',
+    pillar: 'auth',
     kind: 'threat',
-    delta: 5,
+    delta: 45,
   },
   {
-    id: 'weak-recovery',
-    label: 'Weak recovery phone/email',
-    description: 'Recovery channel is older or less protected than the account.',
+    id: 'mfa-sms',
+    label: 'SMS-only 2FA',
+    description: 'One-time codes sent by text — vulnerable to SIM-swap and SS7 interception.',
+    pillar: 'auth',
+    kind: 'threat',
+    delta: 14,
+  },
+
+  /* — Protectives — */
+  {
+    id: 'mfa-app',
+    label: 'Authenticator app (TOTP)',
+    description: 'Google Authenticator, Authy, or 1Password TOTP — not interceptable by SIM-swap.',
+    pillar: 'auth',
+    kind: 'protective',
+    delta: 16,
+  },
+  {
+    id: 'mfa-hardware',
+    label: 'Hardware security key / passkey',
+    description: 'FIDO2/WebAuthn device — phishing-resistant and cryptographically bound to the real site.',
+    pillar: 'auth',
+    kind: 'protective',
+    delta: 28,
+  },
+
+  /* ---------------------------------------------------------------- */
+  /* Recovery Security                                                */
+  /* maxThreat = 38+32+22 = 92   maxProtect = 18   span = 110        */
+  /* ---------------------------------------------------------------- */
+
+  /* — Threats — */
+  {
+    id: 'rec-weak-email',
+    label: 'Weak or old recovery email',
+    description: 'Recovery inbox is under-protected (old password, no MFA, or rarely checked).',
     pillar: 'recovery',
     kind: 'threat',
-    delta: 9,
+    delta: 38,
   },
   {
-    id: 'mfa-fatigue',
+    id: 'rec-same-creds',
+    label: 'Recovery uses same credentials',
+    description: 'Recovery channel shares the same password as the primary account.',
+    pillar: 'recovery',
+    kind: 'threat',
+    delta: 32,
+  },
+  {
+    id: 'rec-exposed-phone',
+    label: 'Recovery phone publicly visible',
+    description: 'Phone number is public-facing and used as the primary 2FA / reset channel.',
+    pillar: 'recovery',
+    kind: 'threat',
+    delta: 22,
+  },
+
+  /* — Protectives — */
+  {
+    id: 'rec-backup-codes',
+    label: 'Backup codes stored safely',
+    description: 'Recovery codes printed or saved in password manager — not in cloud notes or screenshots.',
+    pillar: 'recovery',
+    kind: 'protective',
+    delta: 18,
+  },
+
+  /* ---------------------------------------------------------------- */
+  /* Exposure Surface                                                 */
+  /* maxThreat = 28+18+22+22 = 90   maxProtect = 0   span = 90       */
+  /* ---------------------------------------------------------------- */
+
+  /* — Threats — */
+  {
+    id: 'exp-public-email',
+    label: 'Primary email publicly visible',
+    description: 'Main email address on GitHub, social profiles, resume, or public directories.',
+    pillar: 'exposure',
+    kind: 'threat',
+    delta: 28,
+  },
+  {
+    id: 'exp-public-phone',
+    label: 'Phone number publicly visible',
+    description: 'Personal phone number on public-facing profiles or directories.',
+    pillar: 'exposure',
+    kind: 'threat',
+    delta: 18,
+  },
+  {
+    id: 'exp-public-info',
+    label: 'Personal details on social media',
+    description: 'Birthdays, location, employer, and family details visible on social profiles.',
+    pillar: 'exposure',
+    kind: 'threat',
+    delta: 22,
+  },
+  {
+    id: 'exp-creator',
+    label: 'Public creator or business presence',
+    description: 'Content creator, business owner, or public professional — a higher-value target.',
+    pillar: 'exposure',
+    kind: 'threat',
+    delta: 22,
+  },
+
+  /* ---------------------------------------------------------------- */
+  /* Human & Social Risk                                              */
+  /* maxThreat = 32+38+22 = 92   maxProtect = 0   span = 92          */
+  /* ---------------------------------------------------------------- */
+
+  /* — Threats — */
+  {
+    id: 'bhv-mfa-fatigue',
     label: 'Approves unexpected MFA prompts',
-    description: 'Pattern of confirming pushes without checking.',
+    description: 'Tends to approve 2FA push notifications without verifying the source.',
     pillar: 'behavior',
     kind: 'threat',
-    delta: 7,
+    delta: 32,
   },
   {
-    id: 'oversharing',
-    label: 'Oversharing on social media',
-    description: 'Birthdays, locations, security-question answers visible.',
+    id: 'bhv-phishing',
+    label: 'Phishing susceptible',
+    description: 'Likely to click verification/suspension links or follow urgent email instructions.',
     pillar: 'behavior',
     kind: 'threat',
-    delta: 4,
+    delta: 38,
+  },
+  {
+    id: 'bhv-oversharing',
+    label: 'Oversharing on social media',
+    description: 'Personal details visible online seed both phishing pretexts and security-question bypasses.',
+    pillar: 'behavior',
+    kind: 'threat',
+    delta: 22,
+  },
+
+  /* ---------------------------------------------------------------- */
+  /* Device & Network                                                 */
+  /* maxThreat = 28+24+18 = 70   maxProtect = 22   span = 92         */
+  /* ---------------------------------------------------------------- */
+
+  /* — Threats — */
+  {
+    id: 'dev-no-lock',
+    label: 'No device lock screen',
+    description: 'Main device boots directly or has a weak/no PIN — physical access = full access.',
+    pillar: 'device',
+    kind: 'threat',
+    delta: 28,
+  },
+  {
+    id: 'dev-wifi-open',
+    label: 'Uses public Wi-Fi unprotected',
+    description: 'Connects to café/airport networks without a VPN or phone tether.',
+    pillar: 'device',
+    kind: 'threat',
+    delta: 24,
+  },
+  {
+    id: 'dev-outdated',
+    label: 'Significantly delayed software updates',
+    description: 'OS or apps routinely months behind on security patches.',
+    pillar: 'device',
+    kind: 'threat',
+    delta: 18,
+  },
+
+  /* — Protectives — */
+  {
+    id: 'dev-encrypted',
+    label: 'Device encryption enabled',
+    description: 'Full-disk encryption active (FileVault, BitLocker, default on iOS/Android).',
+    pillar: 'device',
+    kind: 'protective',
+    delta: 22,
   },
 ];
 

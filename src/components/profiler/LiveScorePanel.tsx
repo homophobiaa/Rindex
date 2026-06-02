@@ -156,7 +156,7 @@ export function LiveScorePanel({ state }: { state: FactorState }) {
           </div>
           {breakdown.map((b) => (
             <div key={b.pillar.id} className="flex items-center gap-2">
-              <span className="w-20 truncate text-[10.5px] text-ink-muted">
+              <span className="min-w-0 flex-1 text-[10.5px] text-ink-muted">
                 {b.pillar.label}
               </span>
               <div className="h-0.5 flex-1 overflow-hidden rounded-full bg-surface-3">

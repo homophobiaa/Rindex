@@ -2,8 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   STEPS,
-  TOTAL_QUESTIONS,
-  type ProfilerStep,
+  APPROX_QUESTIONS,
   type Question,
   type QuestionOption,
 } from '@/lib/profile';
@@ -23,19 +22,69 @@ interface Cursor {
   question: number;
 }
 
+/* ------------------------------------------------------------------ */
+/* Adaptive helpers                                                    */
+/* ------------------------------------------------------------------ */
+
+/** Is this question visible given the current factor state? */
+function isVisible(q: Question, state: FactorState): boolean {
+  return !q.condition || q.condition(state);
+}
+
+/**
+ * Find the next visible {step, question} after the given cursor.
+ * Returns 'done' when past the last visible question.
+ *
+ * NOTE: evaluates conditions against `state` (the NEW state produced
+ * by the most recent answer) so skips are always current.
+ */
+function findNext(cursor: Cursor, state: FactorState): Cursor | 'done' {
+  let step = cursor.step;
+  let q = cursor.question + 1;
+
+  while (step < STEPS.length) {
+    const currentStep = STEPS[step];
+    if (q < currentStep.questions.length) {
+      if (isVisible(currentStep.questions[q], state)) {
+        return { step, question: q };
+      }
+      q++;
+    } else {
+      step++;
+      q = 0;
+    }
+  }
+  return 'done';
+}
+
+/**
+ * Count visible questions across all steps for dynamic progress display.
+ * Re-evaluates whenever the state changes (some questions become skippable).
+ */
+function countVisibleQuestions(state: FactorState): number {
+  return STEPS.reduce((acc, s) => acc + s.questions.filter((q) => isVisible(q, state)).length, 0);
+}
+
+/**
+ * Count visible questions per step (for ProgressTrack).
+ */
+function visiblePerStep(state: FactorState): number[] {
+  return STEPS.map((s) => s.questions.filter((q) => isVisible(q, state)).length);
+}
+
+/* ------------------------------------------------------------------ */
+/* Component                                                           */
+/* ------------------------------------------------------------------ */
+
 /**
  * Personal Risk Profiler — top-level state machine.
  *
- * Owns:
+ * Manages:
  *   • phase (intro / flow / result)
- *   • factorState — the shared `@/lib/risk` shape; same engine used by
- *     Methodology and the future fix plan
- *   • cursor — which step/question is active
- *   • answers — id of the option selected per question (for resume UX
- *     when a user backs out and changes their mind)
- *
- * All rendering decisions live in `<QuestionCard>`, `<LiveScorePanel>`,
- * and `<ResultDashboard>` — this component is the controller only.
+ *   • factorState — shared `@/lib/risk` shape
+ *   • cursor — current step/question position
+ *   • answers — records which option was selected per question
+ *   • adaptive skip logic — conditions evaluated after each answer
  */
 export function ProfilerFlow() {
   const [phase, setPhase] = useState<Phase>('intro');
@@ -46,48 +95,39 @@ export function ProfilerFlow() {
 
   const answeredCount = Object.keys(answers).length;
 
-  const answeredByStep = useMemo(() => {
-    return STEPS.map((step) =>
-      step.questions.reduce((n, q) => n + (answers[q.id] ? 1 : 0), 0),
-    );
-  }, [answers]);
+  /** How many questions are visible (adaptive, changes per answer). */
+  const visibleTotal = useMemo(() => countVisibleQuestions(factorState), [factorState]);
 
-  // When the flow reaches the result phase, snapshot the completed profile
-  // into the shared in-memory store so the Unified Risk Dashboard can read
-  // it. Runs on entering 'result' with the final, fully-patched state.
+  /** Per-step visible count for ProgressTrack. */
+  const visibleByStep = useMemo(() => visiblePerStep(factorState), [factorState]);
+
+  /** Answered questions per step — for the progress bar fill. */
+  const answeredByStep = useMemo(
+    () => STEPS.map((step) => step.questions.reduce((n, q) => n + (answers[q.id] ? 1 : 0), 0)),
+    [answers],
+  );
+
+  // Persist completed profile to the shared in-memory store.
   useEffect(() => {
     if (phase !== 'result') return;
-    setResult({
-      state: factorState,
-      answeredCount,
-      totalQuestions: TOTAL_QUESTIONS,
-    });
-  }, [phase, factorState, answeredCount, setResult]);
+    setResult({ state: factorState, answeredCount, totalQuestions: visibleTotal });
+  }, [phase, factorState, answeredCount, visibleTotal, setResult]);
 
-  /** Advance to the next question or step. End -> result phase. */
-  const advance = () => {
-    setCursor((prev) => {
-      const step: ProfilerStep = STEPS[prev.step];
-      if (prev.question + 1 < step.questions.length) {
-        return { step: prev.step, question: prev.question + 1 };
-      }
-      if (prev.step + 1 < STEPS.length) {
-        return { step: prev.step + 1, question: 0 };
-      }
-      // Past the last step — show result.
-      setPhase('result');
-      return prev;
-    });
-  };
-
-  /** Apply a selected option: patch the shared factor state, record
-   *  the choice, schedule advancement on the next tick so the user
-   *  sees the option settle into its "selected" state before moving on. */
+  /** Apply a selected option, record the answer, then advance (with skip). */
   const handleSelect = (question: Question, opt: QuestionOption) => {
-    setFactorState((prev) => ({ ...prev, ...opt.patch }) as FactorState);
+    const newState = { ...factorState, ...opt.patch } as FactorState;
+    setFactorState(newState);
     setAnswers((prev) => ({ ...prev, [question.id]: opt.id }));
-    // Brief delay so the selection animation has time to play.
-    window.setTimeout(advance, 420);
+
+    // Brief delay so the selection animation settles before transition.
+    window.setTimeout(() => {
+      const next = findNext(cursor, newState);
+      if (next === 'done') {
+        setPhase('result');
+      } else {
+        setCursor(next);
+      }
+    }, 400);
   };
 
   const restart = () => {
@@ -102,7 +142,7 @@ export function ProfilerFlow() {
   if (phase === 'intro') {
     return (
       <div className="container-rindex pt-28">
-        <IntroScene onStart={() => setPhase('flow')} totalQuestions={TOTAL_QUESTIONS} />
+        <IntroScene onStart={() => setPhase('flow')} totalQuestions={APPROX_QUESTIONS} />
       </div>
     );
   }
@@ -125,7 +165,11 @@ export function ProfilerFlow() {
     <div className="container-rindex pt-24">
       {/* Top progress + step header */}
       <div className="mx-auto max-w-5xl">
-        <ProgressTrack currentStep={cursor.step} answeredByStep={answeredByStep} />
+        <ProgressTrack
+          currentStep={cursor.step}
+          answeredByStep={answeredByStep}
+          visibleByStep={visibleByStep}
+        />
 
         <AnimatePresence mode="wait">
           <motion.header
@@ -143,12 +187,10 @@ export function ProfilerFlow() {
               >
                 {step.eyebrow}
               </span>
-              <h1 className="mt-0.5 text-card-title font-medium text-ink">
-                {step.title}
-              </h1>
+              <h1 className="mt-0.5 text-card-title font-medium text-ink">{step.title}</h1>
             </div>
             <span className="font-mono text-[11px] tabular-nums text-ink-tertiary">
-              {answeredCount + 1} / {TOTAL_QUESTIONS}
+              {answeredCount + 1} / {visibleTotal}
             </span>
           </motion.header>
         </AnimatePresence>
@@ -174,7 +216,7 @@ export function ProfilerFlow() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Mobile insights — folded under the question */}
+          {/* Mobile insights */}
           <div className="mt-6 lg:hidden">
             <LiveInsights state={factorState} />
           </div>
