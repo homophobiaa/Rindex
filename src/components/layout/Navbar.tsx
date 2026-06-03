@@ -6,6 +6,7 @@ import { Button, LinkButton } from '@/components/ui/Button';
 import { cn } from '@/lib/cn';
 
 const navLinks = [
+  { to: '/dashboard', label: 'Dashboard' },
   { to: '/assessment', label: 'Assessment' },
   { to: '/password-lab', label: 'Password Lab' },
   { to: '/risk-graph', label: 'Attack Paths' },

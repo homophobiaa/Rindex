@@ -80,13 +80,32 @@ export interface ScenarioPhase {
   width: number;
 }
 
+/** User-type tags for scenario recommendation filtering. */
+export type ScenarioUserTag =
+  | 'creator'
+  | 'business'
+  | 'gamer'
+  | 'student'
+  | 'general'
+  | 'highExposure';
+
 export interface Scenario {
   id: string;
   title: string;
   tagline: string;
   description: string;
-  /** Tiny emoji-free icon key used by the scenario selector. */
-  iconKey: 'lock' | 'mail' | 'wifi' | 'star' | 'gamepad';
+  /** Icon key used by the scenario selector (extend as needed). */
+  iconKey:
+    | 'lock'
+    | 'mail'
+    | 'wifi'
+    | 'star'
+    | 'gamepad'
+    | 'camera'
+    | 'store'
+    | 'laptop'
+    | 'phone'
+    | 'shield';
   nodes: AttackNode[];
   edges: AttackEdge[];
   /** Ordered list of node ids that form the canonical attack path. */
@@ -95,6 +114,22 @@ export interface Scenario {
   phases: ScenarioPhase[];
   /** Short, scannable attack-stage names (one per canonical step). */
   stageLabels?: string[];
+
+  /* ── Dashboard integration metadata ─────────────────────────── */
+  /**
+   * v2 factor IDs from `@/lib/risk/factors.ts` that make this scenario
+   * particularly relevant for a given user profile.  Used by the
+   * Dashboard to surface the most applicable scenario.
+   */
+  recommendedFor?: string[];
+  /** User-type tags for scenario recommendation filtering. */
+  userTags?: ScenarioUserTag[];
+  /**
+   * Short human-readable reason shown in the Dashboard recommendation
+   * widget. Should reference the specific factors that triggered it.
+   * Example: "Recommended because your profile shows public email + SMS-only 2FA."
+   */
+  recommendReason?: string;
 }
 
 /* ------------------------------------------------------------------ */

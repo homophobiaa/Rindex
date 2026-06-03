@@ -2,28 +2,29 @@ import { motion } from 'framer-motion';
 import { STEPS } from '@/lib/profile';
 
 /**
- * Compact horizontal step indicator shown at the top of the flow.
+ * Compact horizontal step indicator.
  *
- * Shows one pill per step with progress fill. The current step pulses
- * subtly so the user always knows where they are without having to
- * read numbers.
+ * Uses `visibleByStep` (adaptive visible count per step) rather than
+ * `step.questions.length` so skipped questions don't inflate progress.
  */
 export function ProgressTrack({
   currentStep,
   answeredByStep,
+  visibleByStep,
 }: {
   currentStep: number;
-  /** Map of stepIndex → number of questions answered in that step. */
   answeredByStep: number[];
+  /** Visible (non-skipped) question count per step — from the adaptive flow. */
+  visibleByStep: number[];
 }) {
   return (
     <div className="flex w-full items-center gap-1.5">
       {STEPS.map((step, i) => {
         const answered = answeredByStep[i] ?? 0;
-        const total = step.questions.length;
-        const isDone = answered >= total;
+        const total = visibleByStep[i] ?? step.questions.length;
+        const isDone = total === 0 || answered >= total;
         const isActive = i === currentStep;
-        const frac = total === 0 ? 0 : answered / total;
+        const frac = total === 0 ? 1 : answered / total;
 
         return (
           <div key={step.id} className="flex flex-1 flex-col gap-1">

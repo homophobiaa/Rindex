@@ -171,8 +171,11 @@ export function AttackGraph({
         nodesDraggable
         nodesConnectable={false}
         elementsSelectable
-        panOnScroll
+        zoomOnScroll
         zoomOnPinch
+        panOnDrag
+        panOnScroll={false}
+        preventScrolling
         proOptions={{ hideAttribution: true }}
         minZoom={0.35}
         maxZoom={1.6}
