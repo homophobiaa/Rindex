@@ -30,7 +30,7 @@ const items = [
   },
   {
     title: 'Offline-capable',
-    desc: 'Disconnect your internet — RIndex still works.',
+    desc: 'Visit once online, then disconnect — RIndex keeps working.',
     icon: WifiOffIcon,
   },
 ];

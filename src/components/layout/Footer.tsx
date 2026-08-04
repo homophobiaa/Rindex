@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Logo } from './Logo';
+import { useOfflineReady } from '@/lib/pwa';
 
 const cols: { title: string; links: { label: string; to: string; external?: boolean }[] }[] = [
   {
@@ -32,6 +33,8 @@ const cols: { title: string; links: { label: string; to: string; external?: bool
 ];
 
 export default function Footer() {
+  const offlineReady = useOfflineReady();
+
   return (
     <footer className="relative mt-section border-t border-hairline bg-canvas">
       <div className="container-rindex grid grid-cols-2 gap-10 py-16 md:grid-cols-12">
@@ -48,7 +51,7 @@ export default function Footer() {
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface-1 px-2.5 py-1">
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
-              Works offline
+              {offlineReady ? 'Offline ready' : 'Works offline after first visit'}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface-1 px-2.5 py-1">
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
