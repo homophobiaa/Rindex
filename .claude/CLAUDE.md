@@ -1,4 +1,4 @@
-# RIndex – Copilot Instructions
+# RIndex – Claude Instructions
 
 RIndex is a modern frontend-only cybersecurity analysis platform built with React, Vite, TypeScript and Tailwind CSS.
 
