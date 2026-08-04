@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import { useReduceMotion } from '@/lib/reduce-motion';
 import { analyzePassword } from '@/lib/password/analyze';
 import { PasswordInputCard } from '@/components/password-lab/PasswordInputCard';
 import { VerdictSummary } from '@/components/password-lab/VerdictSummary';
@@ -27,6 +28,7 @@ export default function PasswordLab() {
   const [showAdvanced, setShowAdvanced] = useState(false);
   const verdictRef = useRef<HTMLDivElement | null>(null);
   const advancedRef = useRef<HTMLDivElement | null>(null);
+  const reduceMotion = useReduceMotion();
 
   useEffect(() => {
     return () => {
@@ -45,7 +47,7 @@ export default function PasswordLab() {
   }, [analysis.length, showAdvanced]);
 
   const handleAnalyze = () => {
-    verdictRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    verdictRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
   };
 
   const handleToggleAdvanced = () => {
@@ -54,7 +56,7 @@ export default function PasswordLab() {
       if (next) {
         // Scroll after render
         window.setTimeout(() => {
-          advancedRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          advancedRef.current?.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
         }, 60);
       }
       return next;

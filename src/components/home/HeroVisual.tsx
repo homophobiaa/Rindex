@@ -1,5 +1,7 @@
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import { useEffect } from 'react';
+import { useReduceMotion } from '@/lib/reduce-motion';
+import { useMotionTransition } from '@/lib/motion';
 
 /**
  * Hero visual — a layered "product screenshot" mock showing:
@@ -13,17 +15,22 @@ import { useEffect } from 'react';
  * product capture framed in a glass panel.
  */
 export function HeroVisual() {
+  const reduceMotion = useReduceMotion();
   const score = useMotionValue(0);
   const display = useTransform(score, (v) => Math.round(v));
 
   useEffect(() => {
+    if (reduceMotion) {
+      score.set(68);
+      return;
+    }
     const controls = animate(score, 68, {
       duration: 2.2,
       ease: [0.16, 1, 0.3, 1],
       delay: 0.4,
     });
     return controls.stop;
-  }, [score]);
+  }, [score, reduceMotion]);
 
   return (
     <div className="relative">
@@ -125,6 +132,7 @@ export function HeroVisual() {
 function ScoreGauge({ progress }: { progress: number }) {
   const r = 70;
   const c = 2 * Math.PI * r;
+  const sweep = useMotionTransition({ duration: 2.2, ease: [0.16, 1, 0.3, 1], delay: 0.4 });
   return (
     <svg viewBox="0 0 180 180" className="h-full w-full -rotate-90">
       <defs>
@@ -146,7 +154,7 @@ function ScoreGauge({ progress }: { progress: number }) {
         strokeDasharray={c}
         initial={{ strokeDashoffset: c }}
         animate={{ strokeDashoffset: c * (1 - progress) }}
-        transition={{ duration: 2.2, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
+        transition={sweep}
       />
     </svg>
   );
@@ -168,6 +176,7 @@ const toneColors: Record<string, string> = {
 };
 
 function SubscoreList() {
+  const reduceMotion = useReduceMotion();
   return (
     <ul className="space-y-2.5">
       {subscores.map((s, i) => (
@@ -175,9 +184,13 @@ function SubscoreList() {
           <span className="col-span-5 text-[12.5px] text-ink-muted">{s.label}</span>
           <div className="col-span-5 h-1.5 overflow-hidden rounded-full bg-surface-3">
             <motion.div
-              initial={{ width: 0 }}
+              initial={{ width: reduceMotion ? `${s.value}%` : 0 }}
               animate={{ width: `${s.value}%` }}
-              transition={{ duration: 1.2, delay: 0.6 + i * 0.08, ease: [0.16, 1, 0.3, 1] }}
+              transition={
+                reduceMotion
+                  ? { duration: 0 }
+                  : { duration: 1.2, delay: 0.6 + i * 0.08, ease: [0.16, 1, 0.3, 1] }
+              }
               className="h-full rounded-full"
               style={{ background: `linear-gradient(90deg, ${toneColors[s.tone]}aa, ${toneColors[s.tone]})` }}
             />
@@ -192,12 +205,14 @@ function SubscoreList() {
 }
 
 function EntropyBar() {
+  const reduceMotion = useReduceMotion();
+  const fill = useMotionTransition({ duration: 1.6, delay: 0.8, ease: [0.16, 1, 0.3, 1] });
   return (
     <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-3">
       <motion.div
-        initial={{ width: 0 }}
+        initial={{ width: reduceMotion ? '58%' : 0 }}
         animate={{ width: '58%' }}
-        transition={{ duration: 1.6, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        transition={fill}
         className="h-full rounded-full bg-gradient-to-r from-primary-hover via-primary to-warning"
       />
     </div>
@@ -205,6 +220,7 @@ function EntropyBar() {
 }
 
 function MiniGraph() {
+  const reduceMotion = useReduceMotion();
   // little attack chain
   const nodes = [
     { id: 'pw', x: 12, y: 50, label: 'Weak pw' },
@@ -240,9 +256,9 @@ function MiniGraph() {
               y2={B.y}
               stroke="url(#edge)"
               strokeWidth="1"
-              initial={{ pathLength: 0, opacity: 0 }}
+              initial={{ pathLength: reduceMotion ? 1 : 0, opacity: 0 }}
               animate={{ pathLength: 1, opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.6 + i * 0.2 }}
+              transition={reduceMotion ? { duration: 0 } : { duration: 0.8, delay: 0.6 + i * 0.2 }}
             />
           );
         })}
@@ -252,7 +268,7 @@ function MiniGraph() {
           key={n.id}
           initial={{ opacity: 0, scale: 0.6 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.4, delay: 0.5 + i * 0.15 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.5 + i * 0.15 }}
           className="absolute -translate-x-1/2 -translate-y-1/2 rounded-md border border-hairline bg-surface-2 px-1.5 py-0.5 text-[9.5px] text-ink-muted shadow-glow-soft"
           style={{ left: `${(n.x / 120) * 100}%`, top: `${(n.y / 80) * 100}%` }}
         >

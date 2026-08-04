@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import { useReduceMotion } from '@/lib/reduce-motion';
 import { bruteForce, humanizeSeconds } from '@/lib/crypto-lab/bruteforce';
 
 /**
@@ -53,6 +54,7 @@ const PRESETS: Preset[] = [
 const MAX_LEN = 18;
 
 export function BruteForceCurve() {
+  const reduceMotion = useReduceMotion();
   /** Per-preset summary metrics. */
   const summaries = useMemo(
     () =>
@@ -123,10 +125,14 @@ export function BruteForceCurve() {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   vectorEffect="non-scaling-stroke"
-                  initial={{ pathLength: 0, opacity: 0 }}
+                  initial={{ pathLength: reduceMotion ? 1 : 0, opacity: 0 }}
                   whileInView={{ pathLength: 1, opacity: 1 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 1.1, delay: 0.15 + i * 0.15, ease: [0.16, 1, 0.3, 1] }}
+                  transition={
+                    reduceMotion
+                      ? { duration: 0 }
+                      : { duration: 1.1, delay: 0.15 + i * 0.15, ease: [0.16, 1, 0.3, 1] }
+                  }
                   style={{ filter: `drop-shadow(0 0 6px ${s.accent}55)` }}
                 />
               );

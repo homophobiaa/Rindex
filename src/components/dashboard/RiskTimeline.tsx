@@ -10,6 +10,7 @@ import {
   type TooltipProps,
 } from 'recharts';
 import type { FactorState } from '@/lib/risk';
+import { useReduceMotion } from '@/lib/reduce-motion';
 import { riskTimeline } from '@/lib/dashboard';
 
 /**
@@ -23,6 +24,7 @@ import { riskTimeline } from '@/lib/dashboard';
  */
 export function RiskTimeline({ state }: { state: FactorState }) {
   const steps = useMemo(() => riskTimeline(state, 4), [state]);
+  const reduceMotion = useReduceMotion();
 
   const data = steps.map((s, i) => ({
     name: i === 0 ? 'Now' : `Fix ${i}`,
@@ -99,8 +101,8 @@ export function RiskTimeline({ state }: { state: FactorState }) {
               fill="url(#timelineFill)"
               dot={{ r: 3, fill: '#828fff', strokeWidth: 0 }}
               activeDot={{ r: 5 }}
-              isAnimationActive
-              animationDuration={1100}
+              isAnimationActive={!reduceMotion}
+              animationDuration={reduceMotion ? 0 : 1100}
             />
           </AreaChart>
         </ResponsiveContainer>

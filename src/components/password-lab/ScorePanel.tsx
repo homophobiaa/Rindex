@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useMotionTransition } from '@/lib/motion';
 import { CLASSIFICATION_META, type AnalysisResult } from '@/lib/password/analyze';
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 
@@ -10,6 +11,8 @@ export function ScorePanel({ analysis }: { analysis: AnalysisResult }) {
   const progress = analysis.score / 100;
   const r = 78;
   const c = 2 * Math.PI * r;
+  const sweep = useMotionTransition({ duration: 1.4, ease: [0.16, 1, 0.3, 1] });
+  const badgeIn = useMotionTransition({ duration: 0.4 });
 
   return (
     <div className="panel-glass gradient-border relative overflow-hidden p-6 md:p-8">
@@ -19,7 +22,7 @@ export function ScorePanel({ analysis }: { analysis: AnalysisResult }) {
           key={meta.label}
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+          transition={badgeIn}
           className="rounded-full border px-2.5 py-1 text-caption font-medium"
           style={{
             borderColor: `${meta.color}55`,
@@ -51,7 +54,7 @@ export function ScorePanel({ analysis }: { analysis: AnalysisResult }) {
               fill="none"
               strokeDasharray={c}
               animate={{ strokeDashoffset: c * (1 - progress) }}
-              transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
+              transition={sweep}
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">

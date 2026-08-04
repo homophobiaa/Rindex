@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useMotionTransition } from '@/lib/motion';
 import { CLASSIFICATION_META, type AnalysisResult } from '@/lib/password/analyze';
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
 
@@ -90,6 +91,7 @@ function CompactGauge({ score, color }: { score: number; color: string }) {
   const r = 36;
   const c = 2 * Math.PI * r;
   const pct = Math.max(0, Math.min(1, score / 100));
+  const sweep = useMotionTransition({ duration: 1.1, ease: [0.16, 1, 0.3, 1] });
   return (
     <div className="relative h-[104px] w-[104px] shrink-0">
       <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90">
@@ -104,7 +106,7 @@ function CompactGauge({ score, color }: { score: number; color: string }) {
           fill="none"
           strokeDasharray={c}
           animate={{ strokeDashoffset: c * (1 - pct) }}
-          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          transition={sweep}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">

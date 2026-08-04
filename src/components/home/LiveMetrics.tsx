@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Container } from '@/components/ui/Container';
 import { Eyebrow } from '@/components/ui/Eyebrow';
+import { useReduceMotion } from '@/lib/reduce-motion';
+import { useMotionTransition } from '@/lib/motion';
 
 /**
  * Live cybersecurity metrics. Numbers are simulated client-side to feel alive,
@@ -16,8 +18,15 @@ const metrics = [
 
 export function LiveMetrics() {
   const [values, setValues] = useState(metrics.map((m) => m.start));
+  const reduceMotion = useReduceMotion();
 
   useEffect(() => {
+    // The drift is decorative only. Under reduced motion, hold the baseline
+    // figures steady instead of restlessly ticking.
+    if (reduceMotion) {
+      setValues(metrics.map((m) => m.start));
+      return;
+    }
     const id = setInterval(() => {
       setValues((prev) =>
         prev.map((v, i) => {
@@ -28,7 +37,7 @@ export function LiveMetrics() {
       );
     }, 1400);
     return () => clearInterval(id);
-  }, []);
+  }, [reduceMotion]);
 
   return (
     <section className="relative py-section">
@@ -41,7 +50,7 @@ export function LiveMetrics() {
             </h2>
             <p className="mt-4 max-w-md text-body-lg text-ink-subtle">
               RIndex is built around the idea that personal security is measurable. These
-              numbers update live in your browser — no telemetry, no fetching.
+              numbers are generated in your browser — no telemetry, no fetching.
             </p>
             <p className="mt-3 font-mono text-caption text-ink-tertiary">
               # generated client-side · educational only
@@ -51,14 +60,7 @@ export function LiveMetrics() {
           <div className="md:col-span-7">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {metrics.map((m, i) => (
-                <motion.div
-                  key={m.label}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6, delay: i * 0.08 }}
-                  className="panel relative overflow-hidden p-5"
-                >
+                <MetricCard key={m.label} index={i}>
                   <div className="flex items-center justify-between">
                     <span className="text-caption text-ink-subtle">{m.label}</span>
                     <span className="relative inline-flex h-1.5 w-1.5">
@@ -71,12 +73,27 @@ export function LiveMetrics() {
                     <span className="ml-1 text-[14px] text-ink-subtle">{m.suffix}</span>
                   </div>
                   <div className="mt-4 h-px w-full bg-gradient-to-r from-primary/40 via-hairline to-transparent" />
-                </motion.div>
+                </MetricCard>
               ))}
             </div>
           </div>
         </div>
       </Container>
     </section>
+  );
+}
+
+function MetricCard({ index, children }: { index: number; children: React.ReactNode }) {
+  const transition = useMotionTransition({ duration: 0.6, delay: index * 0.08 });
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={transition}
+      className="panel relative overflow-hidden p-5"
+    >
+      {children}
+    </motion.div>
   );
 }

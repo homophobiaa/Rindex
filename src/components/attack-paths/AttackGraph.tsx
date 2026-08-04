@@ -12,6 +12,7 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
+import { useMotionDuration } from '@/lib/motion';
 import type {
   AttackEdgeData,
   AttackNodeData,
@@ -77,6 +78,7 @@ export function AttackGraph({
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<AttackEdgeData>(initialEdges);
+  const fitDuration = useMotionDuration(0.6, 'ms');
 
   // Replace nodes/edges whenever the scenario changes, and re-fit.
   useEffect(() => {
@@ -88,14 +90,14 @@ export function AttackGraph({
       () =>
         flow.fitView({
           padding: 0.22,
-          duration: wasFirst ? 0 : 600,
+          duration: wasFirst ? 0 : fitDuration,
           maxZoom: 1.05,
           minZoom: 0.5,
         }),
       80,
     );
     return () => window.clearTimeout(t);
-  }, [scenario, headerNodes, setNodes, setEdges, flow]);
+  }, [scenario, headerNodes, setNodes, setEdges, flow, fitDuration]);
 
   // Project simulation state onto live nodes.
   useEffect(() => {

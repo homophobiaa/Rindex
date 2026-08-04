@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { Container } from '@/components/ui/Container';
 import { Eyebrow } from '@/components/ui/Eyebrow';
 import { fadeUp, staggerContainer } from '@/lib/motion';
+import { useReduceMotion } from '@/lib/reduce-motion';
 
 const features = [
   {
@@ -140,6 +141,7 @@ function GraphVisual() {
   ];
   const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
   const toneColor = (t: string) => (t === 'danger' ? '#f04438' : '#f79009');
+  const reduceMotion = useReduceMotion();
 
   return (
     <div className="relative h-44 w-full">
@@ -154,10 +156,10 @@ function GraphVisual() {
             stroke="#5e6ad2"
             strokeOpacity="0.4"
             strokeWidth="0.4"
-            initial={{ pathLength: 0 }}
+            initial={{ pathLength: reduceMotion ? 1 : 0 }}
             whileInView={{ pathLength: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.9, delay: i * 0.12 }}
+            transition={reduceMotion ? { duration: 0 } : { duration: 0.9, delay: i * 0.12 }}
           />
         ))}
       </svg>
@@ -167,7 +169,7 @@ function GraphVisual() {
           initial={{ opacity: 0, scale: 0.7 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.4, delay: 0.2 + i * 0.08 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.2 + i * 0.08 }}
           className="absolute -translate-x-1/2 -translate-y-1/2 rounded-md border bg-surface-2 px-1.5 py-0.5 text-[10px] text-ink"
           style={{
             left: `${n.x}%`,
@@ -189,6 +191,8 @@ function AutomatonVisual() {
     { id: 'q1', x: 50, label: 'Suspicious', tone: '#f79009' },
     { id: 'q2', x: 86, label: 'Dangerous', tone: '#f04438' },
   ];
+  const reduceMotion = useReduceMotion();
+  const drawFrom = reduceMotion ? 1 : 0;
   return (
     <div className="relative h-44">
       <svg viewBox="0 0 100 50" className="absolute inset-0 h-full w-full" preserveAspectRatio="none">
@@ -197,20 +201,20 @@ function AutomatonVisual() {
           stroke="#3a3d46"
           strokeWidth="0.5"
           markerEnd="url(#arrow)"
-          initial={{ pathLength: 0 }}
+          initial={{ pathLength: drawFrom }}
           whileInView={{ pathLength: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.3 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.6, delay: 0.3 }}
         />
         <motion.path
           d="M58 25 H78"
           stroke="#3a3d46"
           strokeWidth="0.5"
           markerEnd="url(#arrow)"
-          initial={{ pathLength: 0 }}
+          initial={{ pathLength: drawFrom }}
           whileInView={{ pathLength: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.55 }}
+          transition={reduceMotion ? { duration: 0 } : { duration: 0.6, delay: 0.55 }}
         />
         <defs>
           <marker id="arrow" markerWidth="4" markerHeight="4" refX="3" refY="2" orient="auto">

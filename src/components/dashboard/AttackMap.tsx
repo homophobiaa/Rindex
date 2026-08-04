@@ -10,6 +10,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import 'reactflow/dist/style.css';
 
 import type { FactorState } from '@/lib/risk';
+import { useMotionDuration } from '@/lib/motion';
 import { buildAttackMap } from '@/lib/dashboard';
 import { AttackNode } from '@/components/attack-paths/nodes/AttackNode';
 import { AttackEdge } from '@/components/attack-paths/AttackEdge';
@@ -41,16 +42,17 @@ function AttackMapInner({ state }: { state: FactorState }) {
   );
   const flow = useReactFlow();
   const [selected, setSelected] = useState<AttackNodeData | null>(null);
+  const fitDuration = useMotionDuration(0.5, 'ms');
 
   // Re-fit whenever the generated topology changes.
   useEffect(() => {
     setSelected(null);
     const t = window.setTimeout(
-      () => flow.fitView({ padding: 0.2, duration: 500, maxZoom: 1, minZoom: 0.4 }),
+      () => flow.fitView({ padding: 0.2, duration: fitDuration, maxZoom: 1, minZoom: 0.4 }),
       60,
     );
     return () => window.clearTimeout(t);
-  }, [nodes, flow]);
+  }, [nodes, flow, fitDuration]);
 
   const handleSelectionChange: OnSelectionChangeFunc = ({ nodes: sel }) => {
     const first = sel[0];

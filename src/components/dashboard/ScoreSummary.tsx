@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useDrawProps } from '@/lib/motion';
 import type { FactorState } from '@/lib/risk';
 import { posture } from '@/lib/profile';
 import {
@@ -35,6 +36,11 @@ export function ScoreSummary({
   // Gauge ring geometry — swept via stroke-dashoffset for a smooth tween.
   const R = 48;
   const CIRC = 2 * Math.PI * R;
+  const gaugeSweep = useDrawProps(
+    { strokeDashoffset: CIRC },
+    { strokeDashoffset: CIRC * (1 - summary.score / 100) },
+    { duration: 1.3, ease: [0.16, 1, 0.3, 1] },
+  );
 
   return (
     <div className="grid items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
@@ -59,9 +65,7 @@ export function ScoreSummary({
                 strokeWidth="7"
                 strokeLinecap="round"
                 strokeDasharray={CIRC}
-                initial={{ strokeDashoffset: CIRC }}
-                animate={{ strokeDashoffset: CIRC * (1 - summary.score / 100) }}
-                transition={{ duration: 1.3, ease: [0.16, 1, 0.3, 1] }}
+                {...gaugeSweep}
               />
             </svg>
             <div className="relative text-center">
@@ -207,6 +211,12 @@ function ConfidenceChip({
   label: string;
   accent: string;
 }) {
+  const C = 2 * Math.PI * 15;
+  const sweep = useDrawProps(
+    { strokeDashoffset: C },
+    { strokeDashoffset: C * (1 - ratio) },
+    { duration: 1, ease: [0.16, 1, 0.3, 1] },
+  );
   return (
     <div className="flex items-center gap-2">
       <div className="text-right">
@@ -226,10 +236,8 @@ function ConfidenceChip({
             stroke={accent}
             strokeWidth="3"
             strokeLinecap="round"
-            strokeDasharray={2 * Math.PI * 15}
-            initial={{ strokeDashoffset: 2 * Math.PI * 15 }}
-            animate={{ strokeDashoffset: 2 * Math.PI * 15 * (1 - ratio) }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            strokeDasharray={C}
+            {...sweep}
           />
         </svg>
       </div>
