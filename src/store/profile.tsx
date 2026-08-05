@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import type { FactorState } from '@/lib/risk';
 
 /**
@@ -42,13 +42,21 @@ const ProfileContext = createContext<ProfileContextValue | null>(null);
 export function ProfileProvider({ children }: { children: ReactNode }) {
   const [result, setResultState] = useState<ProfileResult | null>(null);
 
+  // Referentially stable across renders — NOT dependent on `result`. Consumers
+  // (e.g. ProfilerFlow's completion effect) list `setResult` in a dependency
+  // array; if this identity changed every time `result` changed, the effect
+  // would re-fire on every commit and call setResult again, forming an
+  // infinite render loop that starves the rest of the app (including route
+  // changes) of a chance to settle.
+  const setResult = useCallback<ProfileContextValue['setResult']>(
+    (r) => setResultState({ ...r, capturedAt: Date.now() }),
+    [],
+  );
+  const clear = useCallback(() => setResultState(null), []);
+
   const value = useMemo<ProfileContextValue>(
-    () => ({
-      result,
-      setResult: (r) => setResultState({ ...r, capturedAt: Date.now() }),
-      clear: () => setResultState(null),
-    }),
-    [result],
+    () => ({ result, setResult, clear }),
+    [result, setResult, clear],
   );
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
