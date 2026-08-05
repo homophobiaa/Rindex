@@ -11,7 +11,7 @@ export function AttackSimulation({ analysis }: { analysis: AnalysisResult }) {
       <div className="flex items-end justify-between gap-4">
         <div>
           <span className="text-eyebrow uppercase text-ink-subtle">Attack simulation</span>
-          <h3 className="mt-1 text-card-title text-ink">Time to crack across attacker tiers</h3>
+          <h2 className="mt-1 text-card-title text-ink">Time to crack across attacker tiers</h2>
         </div>
         <div className="text-right">
           <div className="text-caption text-ink-tertiary">Avg. guesses-to-crack</div>
@@ -35,7 +35,7 @@ export function AttackSimulation({ analysis }: { analysis: AnalysisResult }) {
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-[10.5px] text-ink-tertiary">
+                  <span className="font-mono text-micro text-ink-tertiary">
                     {(s.guessesPerSecond).toExponential(0).replace('+', '')} /s
                   </span>
                   <span className="text-body-sm font-medium text-ink">{s.label}</span>
@@ -65,7 +65,7 @@ export function AttackSimulation({ analysis }: { analysis: AnalysisResult }) {
         ))}
       </ul>
 
-      <p className="mt-5 font-mono text-[10.5px] text-ink-tertiary">
+      <p className="mt-5 font-mono text-micro text-ink-tertiary">
         Assumes average-case attacker finds the password after exhausting half the search space.
         Hash rates are approximate single-machine estimates for educational comparison.
       </p>

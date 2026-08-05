@@ -23,7 +23,7 @@ export function RiskBreakdown({ scenario }: RiskBreakdownProps) {
     : null;
 
   return (
-    <div className="w-[280px] overflow-hidden rounded-lg border border-hairline bg-surface-1/85 backdrop-blur-xl">
+    <div className="w-full overflow-hidden rounded-lg border border-hairline bg-surface-1/85 backdrop-blur-xl lg:w-[280px]">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -35,12 +35,12 @@ export function RiskBreakdown({ scenario }: RiskBreakdownProps) {
           aria-hidden
         />
         <div className="min-w-0 flex-1">
-          <div className="text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+          <div className="text-micro font-medium uppercase tracking-wider text-ink-tertiary">
             Chain probability
           </div>
           <div className="font-mono text-[13px] tabular-nums text-ink">
             {formatPct(chain)}
-            <span className="ml-1.5 text-[10.5px] text-ink-tertiary">
+            <span className="ml-1.5 text-micro text-ink-tertiary">
               · {scenario.path.length} stages
             </span>
           </div>
@@ -80,7 +80,7 @@ export function RiskBreakdown({ scenario }: RiskBreakdownProps) {
               {weakest && weakestNode && (
                 <Block title="Weakest link">
                   <div className="rounded-md border border-hairline bg-surface-2/60 p-2">
-                    <div className="font-mono text-[10px] uppercase tracking-wider text-ink-tertiary">
+                    <div className="font-mono text-micro uppercase tracking-wider text-ink-tertiary">
                       {formatPct(weakest.probability)} likelihood
                     </div>
                     <div className="mt-0.5 text-[12px] font-medium text-ink">
@@ -103,7 +103,7 @@ export function RiskBreakdown({ scenario }: RiskBreakdownProps) {
 function Block({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-2.5 last:mb-0">
-      <div className="mb-1 text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+      <div className="mb-1 text-micro font-medium uppercase tracking-wider text-ink-tertiary">
         {title}
       </div>
       {children}

@@ -48,7 +48,7 @@ export function WeakestLinks({ state }: { state: FactorState }) {
               <div className="flex items-baseline justify-between gap-2">
                 <h4 className="text-[13.5px] font-medium text-ink">{l.title}</h4>
                 <span
-                  className="shrink-0 rounded-full px-1.5 py-0.5 text-[9.5px] font-medium"
+                  className="shrink-0 rounded-full px-1.5 py-0.5 text-micro font-medium"
                   style={{ background: '#f0443818', color: '#f04438' }}
                 >
                   +{l.impact} risk

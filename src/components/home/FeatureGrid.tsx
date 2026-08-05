@@ -64,7 +64,7 @@ export function FeatureGrid() {
               className={`panel group relative flex flex-col overflow-hidden p-6 ${f.span}`}
             >
               <div className="flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface-2 px-2 py-0.5 font-mono text-[10.5px] text-ink-muted">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface-2 px-2 py-0.5 font-mono text-micro text-ink-muted">
                   <span className="h-1 w-1 rounded-full bg-primary" />
                   {f.tag}
                 </span>
@@ -113,7 +113,7 @@ function EntropyVisual() {
           />
         ))}
       </div>
-      <div className="mt-2 flex justify-between font-mono text-[10px] text-ink-tertiary">
+      <div className="mt-2 flex justify-between font-mono text-micro text-ink-tertiary">
         <span>4 chars</span>
         <span>8</span>
         <span>12</span>
@@ -170,7 +170,7 @@ function GraphVisual() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={reduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.2 + i * 0.08 }}
-          className="absolute -translate-x-1/2 -translate-y-1/2 rounded-md border bg-surface-2 px-1.5 py-0.5 text-[10px] text-ink"
+          className="absolute -translate-x-1/2 -translate-y-1/2 rounded-md border bg-surface-2 px-1.5 py-0.5 text-micro text-ink"
           style={{
             left: `${n.x}%`,
             top: `${n.y}%`,
@@ -230,15 +230,15 @@ function AutomatonVisual() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: i * 0.18 }}
-            className="flex h-14 w-14 flex-col items-center justify-center rounded-full border bg-surface-2 text-[10px] text-ink-muted"
+            className="flex h-14 w-14 flex-col items-center justify-center rounded-full border bg-surface-2 text-micro text-ink-muted"
             style={{ borderColor: `${s.tone}66`, boxShadow: `0 0 20px -6px ${s.tone}88` }}
           >
-            <span className="font-mono text-[9px] text-ink-tertiary">{s.id}</span>
+            <span className="font-mono text-micro text-ink-tertiary">{s.id}</span>
             <span>{s.label}</span>
           </motion.div>
         ))}
       </div>
-      <div className="absolute inset-x-0 bottom-1 text-center font-mono text-[10px] text-ink-tertiary">
+      <div className="absolute inset-x-0 bottom-1 text-center font-mono text-micro text-ink-tertiary">
         δ : Σ × Q → Q
       </div>
     </div>
@@ -246,11 +246,13 @@ function AutomatonVisual() {
 }
 
 function PhishingVisual() {
+  // The lookalike domain is the whole lesson, so the sender must never be
+  // truncated — only the subject line is allowed to clip.
   const rows = [
-    { from: 'security@paypa1.com', subject: 'Your account will be locked in 24h', risk: 'high' },
-    { from: 'no-reply@github.com', subject: 'Sign-in from a new device', risk: 'low' },
-    { from: 'support@netfl1x-billing.io', subject: 'Update your payment method', risk: 'high' },
-    { from: 'team@linear.app', subject: 'Weekly project digest', risk: 'low' },
+    { from: 'security@paypa1.com', subject: 'Account locked in 24h', spoofed: true },
+    { from: 'no-reply@github.com', subject: 'New device sign-in', spoofed: false },
+    { from: 'billing@netfl1x.io', subject: 'Update your card', spoofed: true },
+    { from: 'team@linear.app', subject: 'Weekly digest', spoofed: false },
   ];
   return (
     <div className="space-y-1.5">
@@ -261,20 +263,20 @@ function PhishingVisual() {
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4, delay: i * 0.08 }}
-          className="flex items-center justify-between rounded-md border border-hairline bg-surface-1/70 px-3 py-2"
+          className="flex items-center justify-between gap-2 rounded-md border border-hairline bg-surface-1/70 px-3 py-2"
         >
           <div className="min-w-0">
-            <div className="truncate font-mono text-[11px] text-ink-muted">{r.from}</div>
+            <div className="break-all font-mono text-[11px] text-ink-muted">{r.from}</div>
             <div className="truncate text-[12px] text-ink">{r.subject}</div>
           </div>
           <span
             className={
-              r.risk === 'high'
-                ? 'rounded-full border border-danger/30 bg-danger/10 px-2 py-0.5 text-[10px] text-danger'
-                : 'rounded-full border border-success/30 bg-success/10 px-2 py-0.5 text-[10px] text-success'
+              r.spoofed
+                ? 'shrink-0 rounded-full border border-danger/30 bg-danger/10 px-2 py-0.5 text-micro text-danger'
+                : 'shrink-0 rounded-full border border-success/30 bg-success/10 px-2 py-0.5 text-micro text-success'
             }
           >
-            {r.risk === 'high' ? 'phishing' : 'legit'}
+            {r.spoofed ? 'Spoofed' : 'Genuine'}
           </span>
         </motion.div>
       ))}

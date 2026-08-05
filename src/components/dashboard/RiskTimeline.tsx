@@ -52,7 +52,7 @@ export function RiskTimeline({ state }: { state: FactorState }) {
       {/* Headline drop */}
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-hairline px-6 py-4">
         <div>
-          <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+          <span className="text-micro font-medium uppercase tracking-[0.18em] text-ink-tertiary">
             Projected RiskIndex
           </span>
           <div className="mt-1 flex items-baseline gap-2">
@@ -62,7 +62,7 @@ export function RiskTimeline({ state }: { state: FactorState }) {
           </div>
         </div>
         <div className="text-right">
-          <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+          <span className="text-micro font-medium uppercase tracking-[0.18em] text-ink-tertiary">
             Total reduction
           </span>
           <div className="mt-1 font-mono text-[26px] tabular-nums text-success">−{totalDrop}</div>
@@ -119,7 +119,7 @@ export function RiskTimeline({ state }: { state: FactorState }) {
             transition={{ duration: 0.3, delay: i * 0.06 }}
             className="flex items-center gap-2 rounded-full border border-hairline bg-surface-2/50 py-1 pl-2.5 pr-3"
           >
-            <span className="font-mono text-[10px] tabular-nums text-success">−{s.delta}</span>
+            <span className="font-mono text-micro tabular-nums text-success">−{s.delta}</span>
             <span className="text-[11.5px] text-ink-subtle">{s.label}</span>
           </motion.div>
         ))}

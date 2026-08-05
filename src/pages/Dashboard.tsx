@@ -54,8 +54,8 @@ export default function Dashboard() {
           className="mb-6 flex flex-wrap items-end justify-between gap-3"
         >
           <div>
-            <span className="text-[11px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
-              Unified Risk Dashboard
+            <span className="text-caption font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+              Results
             </span>
             <h1 className="mt-1 text-headline font-semibold text-ink">Your security posture</h1>
           </div>
@@ -111,8 +111,8 @@ export default function Dashboard() {
         {/* 4 · Attack likelihoods */}
         <DashSection
           eyebrow="Threat model"
-          title="Attack likelihoods"
-          hint="Estimated success odds, most likely first"
+          title="Exposure by attack type"
+          hint="Illustrative weighting from your answers — not measured odds"
         >
           <AttackLikelihoods state={state} />
         </DashSection>
@@ -146,9 +146,9 @@ export default function Dashboard() {
 
         {/* 6 · Risk reduction timeline */}
         <DashSection
-          eyebrow="Forecast"
-          title="Risk reduction timeline"
-          hint="Apply the top fixes in order"
+          eyebrow="What-if"
+          title="Score after each fix"
+          hint="Applying the top fixes in order"
         >
           <RiskTimeline state={state} />
         </DashSection>
@@ -162,9 +162,10 @@ export default function Dashboard() {
           <PriorityRecommendations state={state} />
         </DashSection>
 
-        <p className="mx-auto mt-14 max-w-xl text-center text-[11px] leading-relaxed text-ink-tertiary">
-          Every calculation ran locally in your browser. No answers were transmitted, stored, or
-          logged. Reload this tab and your profile is gone.
+        <p className="mx-auto mt-14 max-w-xl text-center text-caption leading-relaxed text-ink-tertiary">
+          Every calculation ran in this page. Your answers are not stored and are not sent
+          anywhere — reload the tab and your profile is gone. This is an educational estimate
+          based on what you reported, not a security audit.
         </p>
       </div>
     </PageShell>

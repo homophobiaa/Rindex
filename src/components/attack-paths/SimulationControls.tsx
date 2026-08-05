@@ -47,11 +47,11 @@ export function SimulationControls({
           className="mx-auto max-w-[640px] rounded-lg border border-hairline bg-surface-1/85 px-3.5 py-2 backdrop-blur-xl"
         >
           <div className="flex items-center gap-2.5">
-            <span className="font-mono text-[10px] tabular-nums text-ink-tertiary">
+            <span className="font-mono text-micro tabular-nums text-ink-tertiary">
               STAGE {String(shownIdx).padStart(2, '0')} / {String(total).padStart(2, '0')}
             </span>
             {step.stageLabel && (
-              <span className="text-[10px] font-medium uppercase tracking-wider text-primary">
+              <span className="text-micro font-medium uppercase tracking-wider text-primary">
                 {step.stageLabel}
               </span>
             )}
@@ -63,8 +63,9 @@ export function SimulationControls({
         </motion.div>
       )}
 
-      {/* Transport pill */}
-      <div className="mx-auto flex items-center gap-2 rounded-full border border-hairline bg-surface-1/90 px-2 py-1.5 backdrop-blur-xl shadow-2xl">
+      {/* Transport pill — wraps to two rows rather than overflowing on
+          narrow screens, where the full-width row does not fit. */}
+      <div className="mx-auto flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1.5 rounded-2xl border border-hairline bg-surface-1/90 px-2 py-1.5 shadow-2xl backdrop-blur-xl sm:flex-nowrap sm:rounded-full">
         <TransportButton
           label={playing ? 'Pause' : 'Play'}
           onClick={playing ? onPause : onPlay}
@@ -81,11 +82,11 @@ export function SimulationControls({
           <ResetIcon className="h-3.5 w-3.5" />
         </TransportButton>
 
-        <span className="mx-1 h-5 w-px bg-hairline" />
+        <span className="mx-1 hidden h-5 w-px bg-hairline sm:block" />
 
         {/* Progress */}
-        <div className="flex w-[180px] items-center gap-2">
-          <span className="font-mono text-[10px] tabular-nums text-ink-tertiary">
+        <div className="flex w-[120px] items-center gap-2 sm:w-[180px]">
+          <span className="font-mono text-micro tabular-nums text-ink-tertiary">
             {String(shownIdx).padStart(2, '0')}/{String(total).padStart(2, '0')}
           </span>
           <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-surface-3">
@@ -97,7 +98,7 @@ export function SimulationControls({
           </div>
         </div>
 
-        <span className="mx-1 h-5 w-px bg-hairline" />
+        <span className="mx-1 hidden h-5 w-px bg-hairline sm:block" />
 
         {/* Speed */}
         <div className="flex items-center rounded-full bg-surface-2 p-0.5">
@@ -107,11 +108,13 @@ export function SimulationControls({
               type="button"
               onClick={() => onSetSpeed(s)}
               className={cn(
-                'rounded-full px-2 py-0.5 font-mono text-[10.5px] tabular-nums transition-colors',
+                'inline-flex min-h-[28px] min-w-[34px] items-center justify-center rounded-full px-2 font-mono text-[11px] tabular-nums transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus/60',
                 state.speed === s
                   ? 'bg-primary/90 text-white'
                   : 'text-ink-tertiary hover:text-ink',
               )}
+              aria-label={`Playback speed ${s} times`}
               aria-pressed={state.speed === s}
             >
               {s}x

@@ -23,9 +23,9 @@ export function CTASection() {
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               className="text-balance text-display-md text-gradient md:text-display-lg"
             >
-              Your security has measurable weaknesses.
+              Most weak points are habits.
               <br />
-              <span className="text-gradient-primary">Find them in 3 minutes.</span>
+              <span className="text-gradient-primary">Find yours in about a minute.</span>
             </motion.h2>
             <motion.p
               initial={{ opacity: 0, y: 12 }}
@@ -34,8 +34,8 @@ export function CTASection() {
               transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
               className="mx-auto mt-5 max-w-xl text-body-lg text-ink-subtle"
             >
-              No signup. No tracking. No data leaves your browser. Just an honest answer to one
-              question: how hackable are you?
+              About ten questions, no signup, nothing sent anywhere. You get a score, the
+              reasoning behind it, and a short list of what to fix first.
             </motion.p>
             <motion.div
               initial={{ opacity: 0, y: 12 }}

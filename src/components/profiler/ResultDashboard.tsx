@@ -181,7 +181,7 @@ export function ResultDashboard({
                   <span className="font-mono text-[11px] tabular-nums text-primary">
                     {String(i + 1).padStart(2, '0')}
                   </span>
-                  <span className="rounded-full bg-danger/10 px-1.5 py-0.5 text-[9.5px] font-medium text-danger">
+                  <span className="rounded-full bg-danger/10 px-1.5 py-0.5 text-micro font-medium text-danger">
                     −{r.impact}
                   </span>
                 </div>
@@ -293,7 +293,7 @@ function HeroTile({
 }) {
   return (
     <div className="rounded-xl border border-hairline bg-surface-1/60 p-4">
-      <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+      <div className="text-micro font-medium uppercase tracking-[0.18em] text-ink-tertiary">
         {label}
       </div>
       <div

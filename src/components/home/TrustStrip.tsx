@@ -4,32 +4,32 @@ import { fadeUp, staggerContainer } from '@/lib/motion';
 
 const items = [
   {
-    title: 'Frontend-only',
-    desc: 'No backend, no database, no analytics tied to your answers.',
+    title: 'No backend',
+    desc: 'There is no server to send your answers to, and no account to create.',
     icon: BrowserIcon,
   },
   {
-    title: 'No stored passwords',
-    desc: 'Passwords never touch localStorage, sessionStorage or the network.',
+    title: 'Passwords stay in memory',
+    desc: 'What you type in the Password Lab is never written to storage or sent anywhere.',
     icon: LockIcon,
   },
   {
-    title: 'Local computation',
-    desc: 'Entropy, scoring and risk graphs are computed in your browser.',
+    title: 'Computed on your device',
+    desc: 'Entropy, scoring and the attack graph are all calculated in the page itself.',
     icon: CpuIcon,
   },
   {
-    title: 'Mathematically scored',
-    desc: 'Based on entropy, combinatorics and graph-based attack chains.',
+    title: 'Nothing kept after you leave',
+    desc: 'Your answers live in memory only. Close or reload the tab and they are gone.',
     icon: SigmaIcon,
   },
   {
-    title: 'Public source code',
-    desc: 'Inspect exactly how every score and recommendation is calculated.',
+    title: 'Source you can read',
+    desc: 'The scoring weights and formulas are in the public repository.',
     icon: CodeIcon,
   },
   {
-    title: 'Offline-capable',
+    title: 'Works offline',
     desc: 'Visit once online, then disconnect — RIndex keeps working.',
     icon: WifiOffIcon,
   },
@@ -54,11 +54,11 @@ export function TrustStrip() {
             variants={fadeUp}
             className="mt-4 text-balance text-display-md text-gradient md:text-display-lg"
           >
-            Built so your data never has to trust us.
+            Nothing to send, so nothing to leak.
           </motion.h2>
           <motion.p variants={fadeUp} className="mt-4 text-body-lg text-ink-subtle">
-            Every calculation happens inside your browser. There is no server to compromise,
-            because there is no server at all.
+            RIndex is a static site. Every calculation happens in the page you already
+            loaded — there is no server holding your answers because there is no server.
           </motion.p>
         </motion.div>
 

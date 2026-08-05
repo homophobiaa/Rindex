@@ -27,7 +27,7 @@ export function CryptoVisual() {
   return (
     <div className="space-y-4">
       <div>
-        <label className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+        <label className="text-micro font-medium uppercase tracking-[0.18em] text-ink-tertiary">
           Input
         </label>
         <input
@@ -41,10 +41,10 @@ export function CryptoVisual() {
 
       <div className="rounded-xl border border-hairline bg-surface-2/40 p-4">
         <div className="flex items-baseline justify-between">
-          <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+          <span className="text-micro font-medium uppercase tracking-[0.18em] text-ink-tertiary">
             SHA-256 fingerprint
           </span>
-          <span className="font-mono text-[10px] tabular-nums text-ink-tertiary">
+          <span className="font-mono text-micro tabular-nums text-ink-tertiary">
             256 bits · 64 hex
           </span>
         </div>
@@ -78,11 +78,11 @@ export function CryptoVisual() {
 function Stat({ label, value, detail }: { label: string; value: string; detail: string }) {
   return (
     <div className="rounded-lg border border-hairline bg-surface-2/40 px-3 py-2.5">
-      <div className="text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+      <div className="text-micro font-medium uppercase tracking-wider text-ink-tertiary">
         {label}
       </div>
       <div className="mt-0.5 font-mono text-[14px] text-primary">{value}</div>
-      <p className="mt-1 text-[10.5px] leading-snug text-ink-tertiary">{detail}</p>
+      <p className="mt-1 text-micro leading-snug text-ink-tertiary">{detail}</p>
     </div>
   );
 }

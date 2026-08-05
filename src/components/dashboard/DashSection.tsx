@@ -31,7 +31,7 @@ export function DashSection({
     >
       <header className="mb-4 flex items-baseline justify-between gap-4">
         <div>
-          <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+          <span className="text-micro font-medium uppercase tracking-[0.18em] text-ink-tertiary">
             {eyebrow}
           </span>
           <h2 className="mt-0.5 text-card-title font-medium text-ink">{title}</h2>

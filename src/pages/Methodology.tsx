@@ -13,8 +13,8 @@ import { Takeaways } from '@/components/methodology/Takeaways';
  *
  * A transparent, interactive walkthrough of the scoring engine,
  * probability model, and discrete-math/cryptography foundations that
- * power the rest of RIndex. The same scoring lib used here
- * (`@/lib/risk`) will be re-used by the upcoming Personal Risk Profiler.
+ * power the rest of RIndex. The scoring lib used here (`@/lib/risk`) is
+ * the same one the assessment and dashboard read from.
  */
 export default function Methodology() {
   return (
@@ -38,10 +38,10 @@ export default function Methodology() {
             How RiskIndex calculates risk
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-body text-ink-subtle">
-            RiskIndex combines password analysis, attack-chain modeling,
-            probability theory, cryptography, and human-behavior heuristics to
-            estimate your digital exposure. Every formula is documented and
-            runs locally in your browser.
+            Your RiskIndex is a weighted score built from the habits you report,
+            combined with entropy math and a simple probability model. It is an
+            educational estimate, not a security audit — and every formula behind
+            it is on this page.
           </p>
 
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
@@ -70,8 +70,8 @@ export default function Methodology() {
             index={2}
             eyebrow="Live scoring"
             title="Try the engine yourself"
-            description="Toggle protective layers and threat conditions to watch the composite RiskIndex, per-pillar scores, and attacker-success probability recompute in real time."
-            footnote="The toggles call the exact same scoring engine the upcoming Personal Risk Profiler will use. There is no demo-only math — what you see here is what runs in production."
+            description="Toggle protective layers and threat conditions to watch the composite RiskIndex, per-pillar scores, and modeled attacker-success probability recompute as you go."
+            footnote="These toggles call the same scoring engine as the assessment and the dashboard. There is no separate demo math."
           >
             <ScoreSimulator />
           </MethodSection>
@@ -79,9 +79,9 @@ export default function Methodology() {
           <MethodSection
             index={3}
             eyebrow="Weakest link"
-            title="A chain breaks at its worst step"
-            description="Security is a product of probabilities. The chance an attacker succeeds anywhere along the chain is 1 − ∏(1 − pᵢ) — and a single weak step dominates the entire result."
-            footnote="This is conditional probability in plain sight. Strong password + weak recovery email still gives the attacker an easy door."
+            title="Your easiest door decides your risk"
+            description="An attacker only needs one way in. If each route has an independent chance pᵢ of working, the chance at least one succeeds is 1 − ∏(1 − pᵢ) — a number the weakest route dominates."
+            footnote="This is why a strong password and a weak recovery inbox still add up to an easy account takeover."
           >
             <WeakestLinkChain />
           </MethodSection>
@@ -134,9 +134,9 @@ export default function Methodology() {
           transition={{ duration: 0.6 }}
           className="mx-auto mt-24 max-w-2xl text-center"
         >
-          <p className="text-[12px] leading-relaxed text-ink-tertiary">
-            Every calculation on this page runs locally in your browser. No
-            answers, toggles, or inputs are transmitted, stored, or logged.
+          <p className="text-caption leading-relaxed text-ink-tertiary">
+            Every calculation on this page runs in your browser. Nothing you type or
+            toggle is sent anywhere or saved.
           </p>
         </motion.footer>
       </div>

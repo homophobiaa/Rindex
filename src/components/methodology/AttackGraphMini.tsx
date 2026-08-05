@@ -92,7 +92,7 @@ export function AttackGraphMini() {
                   x={mx}
                   y={my}
                   textAnchor="middle"
-                  fontSize="9"
+                  fontSize="11"
                   fontFamily="JetBrains Mono, ui-monospace, monospace"
                   fill={active ? '#d0d6e0' : '#62666d'}
                   className="select-none"
@@ -132,7 +132,7 @@ export function AttackGraphMini() {
                   x={n.x}
                   y={n.y + 4}
                   textAnchor="middle"
-                  fontSize="9"
+                  fontSize="11"
                   fontFamily="Inter, system-ui, sans-serif"
                   fontWeight={500}
                   fill="#f7f8f8"
@@ -144,7 +144,7 @@ export function AttackGraphMini() {
                   x={n.x}
                   y={n.y + 14}
                   textAnchor="middle"
-                  fontSize="8"
+                  fontSize="11"
                   fontFamily="Inter, system-ui, sans-serif"
                   fill="#8a8f98"
                   className="pointer-events-none select-none"
@@ -171,7 +171,7 @@ export function AttackGraphMini() {
               <div className="flex items-baseline justify-between">
                 <span className="text-[12.5px] font-medium text-ink">{node.label}</span>
                 <span
-                  className="rounded-full px-1.5 py-0.5 text-[9.5px] font-medium uppercase tracking-wider"
+                  className="rounded-full px-1.5 py-0.5 text-micro font-medium uppercase tracking-wider"
                   style={{
                     color: COLOR_BY_KIND[node.kind],
                     background: `${COLOR_BY_KIND[node.kind]}1a`,
@@ -188,7 +188,7 @@ export function AttackGraphMini() {
         </AnimatePresence>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 text-[10.5px] text-ink-tertiary">
+      <div className="flex flex-wrap items-center gap-3 text-micro text-ink-tertiary">
         <LegendDot color={COLOR_BY_KIND.entry} label="entry" />
         <LegendDot color={COLOR_BY_KIND.pivot} label="pivot" />
         <LegendDot color={COLOR_BY_KIND.goal} label="goal" />

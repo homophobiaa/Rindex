@@ -84,7 +84,7 @@ export function QuestionCard({
                       initial={{ opacity: 0, scale: 0.6 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                      className="font-mono text-[10px] uppercase tracking-wider"
+                      className="font-mono text-micro uppercase tracking-wider"
                       style={{ color: accent }}
                     >
                       selected

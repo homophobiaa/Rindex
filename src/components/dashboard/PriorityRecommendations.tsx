@@ -14,7 +14,7 @@ export function PriorityRecommendations({ state }: { state: FactorState }) {
   if (recs.length === 0) {
     return (
       <div className="rounded-2xl border border-success/20 bg-success/[0.06] px-5 py-6 text-center">
-        <h4 className="text-[14px] font-medium text-ink">Nothing urgent to fix</h4>
+        <h3 className="text-[14px] font-medium text-ink">Nothing urgent to fix</h3>
         <p className="mx-auto mt-1 max-w-md text-[12.5px] text-ink-subtle">
           Every modeled weakness is already closed. Re-run the profiler whenever you add a new
           account, device, or service to keep this current.
@@ -41,7 +41,7 @@ export function PriorityRecommendations({ state }: { state: FactorState }) {
                 <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-primary/15 font-mono text-[12px] tabular-nums text-primary">
                   {i + 1}
                 </span>
-                <h4 className="text-[14px] font-medium leading-snug text-ink">{r.action}</h4>
+                <h3 className="text-[14px] font-medium leading-snug text-ink">{r.action}</h3>
               </div>
             </div>
 
@@ -62,7 +62,7 @@ export function PriorityRecommendations({ state }: { state: FactorState }) {
 function Stat({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div className="flex items-baseline gap-1.5">
-      <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-ink-tertiary">
+      <span className="text-micro font-medium uppercase tracking-[0.14em] text-ink-tertiary">
         {label}
       </span>
       <span className="font-mono text-[13px] tabular-nums" style={{ color }}>

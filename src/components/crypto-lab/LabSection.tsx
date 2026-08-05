@@ -39,11 +39,11 @@ export function LabSection({
     >
       <header className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
         <div className="flex items-baseline gap-3">
-          <span className="font-mono text-[10.5px] tabular-nums text-ink-tertiary">
+          <span className="font-mono text-micro tabular-nums text-ink-tertiary">
             {String(index).padStart(2, '0')}
           </span>
           <div>
-            <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-primary">
+            <span className="text-micro font-medium uppercase tracking-[0.18em] text-primary">
               {eyebrow}
             </span>
             <h2 className="mt-0.5 text-headline font-medium text-ink">{title}</h2>
@@ -77,7 +77,7 @@ function ConceptCard({
   return (
     <div className="rounded-lg border border-hairline bg-surface-2/40 px-3.5 py-3">
       <div
-        className="text-[10px] font-medium uppercase tracking-wider"
+        className="text-micro font-medium uppercase tracking-wider"
         style={{ color: accent }}
       >
         {label}

@@ -3,7 +3,7 @@
  *
  * Thresholds calibrated for the v2 normalized scoring engine:
  *
- *   very secure  →  ~7–12   →  enterprise / resilient
+ *   very secure  →  ~7–12   →  very-well-protected / resilient
  *   average      →  ~48–58  →  moderate
  *   very risky   →  ~88–98  →  highly-exposed
  */
@@ -29,8 +29,8 @@ export interface PostureMeta {
 const ORDER: PostureMeta[] = [
   {
     id: 'enterprise',
-    label: 'Enterprise-grade habits',
-    blurb: 'Hardware MFA, unique passwords, and hardened recovery. You are a very hard target.',
+    label: 'Very well protected',
+    blurb: 'Hardware MFA, unique passwords and hardened recovery. Few easy ways in remain.',
     accent: '#27a644',
     ceiling: 18,
   },

@@ -67,7 +67,7 @@ function AttackEdgeImpl(props: EdgeProps<AttackEdgeData>) {
               pointerEvents: 'none',
               opacity: v.opacity,
             }}
-            className="rounded border border-hairline bg-surface-2/90 px-1.5 py-0.5 font-mono text-[10px] text-ink-subtle backdrop-blur-sm"
+            className="rounded border border-hairline bg-surface-2/90 px-1.5 py-0.5 font-mono text-micro text-ink-subtle backdrop-blur-sm"
           >
             {data.label}
             {typeof data.probability === 'number' && (
@@ -86,7 +86,7 @@ function AttackEdgeImpl(props: EdgeProps<AttackEdgeData>) {
               transform: `translate(-50%, -50%) translate(${labelX}px, ${labelY}px)`,
               pointerEvents: 'none',
             }}
-            className="rounded border border-danger/30 bg-surface-2/90 px-1.5 py-0.5 font-mono text-[10px] text-danger"
+            className="rounded border border-danger/30 bg-surface-2/90 px-1.5 py-0.5 font-mono text-micro text-danger"
           >
             {Math.round(data.probability * 100)}%
           </div>

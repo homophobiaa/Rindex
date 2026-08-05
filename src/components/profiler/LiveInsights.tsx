@@ -20,10 +20,10 @@ export function LiveInsights({ state }: { state: FactorState }) {
   return (
     <div className="rounded-2xl border border-hairline bg-surface-1/50 p-4 backdrop-blur-sm">
       <div className="flex items-baseline justify-between">
-        <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+        <span className="text-micro font-medium uppercase tracking-[0.18em] text-ink-tertiary">
           Live insights
         </span>
-        <span className="font-mono text-[9.5px] tabular-nums text-ink-tertiary">
+        <span className="font-mono text-micro tabular-nums text-ink-tertiary">
           updates per answer
         </span>
       </div>
@@ -62,7 +62,7 @@ function InsightRow({ rec }: { rec: Recommendation }) {
     >
       <div className="flex items-baseline justify-between gap-3">
         <span className="text-[12px] font-medium text-ink">{rec.title}</span>
-        <span className="shrink-0 font-mono text-[10px] tabular-nums text-warning">
+        <span className="shrink-0 font-mono text-micro tabular-nums text-warning">
           −{rec.impact} pts
         </span>
       </div>

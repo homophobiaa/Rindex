@@ -21,7 +21,7 @@ function PhaseHeaderImpl({ data }: NodeProps<PhaseHeaderData>) {
       style={{ width: data.width - 24 }}
     >
       <div className="flex items-center gap-2">
-        <span className="font-mono text-[10px] tabular-nums text-ink-tertiary">
+        <span className="font-mono text-micro tabular-nums text-ink-tertiary">
           {String(data.index + 1).padStart(2, '0')}
         </span>
         <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-ink-subtle">

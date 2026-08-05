@@ -115,7 +115,7 @@ function HashCard({ eyebrow, label, source, hash, changedMask }: HashCardProps) 
     <div className="rounded-lg border border-hairline bg-surface-2/40 p-3.5">
       <div className="mb-2 flex items-center justify-between">
         <div>
-          <div className="text-[10px] font-medium uppercase tracking-wider text-primary">
+          <div className="text-micro font-medium uppercase tracking-wider text-primary">
             {eyebrow}
           </div>
           <div className="mt-0.5 text-[11.5px] text-ink-subtle">{label}</div>
@@ -182,7 +182,7 @@ function Metric({
 }) {
   return (
     <div>
-      <div className="text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+      <div className="text-micro font-medium uppercase tracking-wider text-ink-tertiary">
         {label}
       </div>
       <div

@@ -39,7 +39,7 @@ export function EntropyVisualization({ analysis }: { analysis: AnalysisResult })
       <div className="flex items-end justify-between gap-4">
         <div>
           <span className="text-eyebrow uppercase text-ink-subtle">Entropy visualization</span>
-          <h3 className="mt-1 text-card-title text-ink">How much randomness you actually have</h3>
+          <h2 className="mt-1 text-card-title text-ink">How much randomness you actually have</h2>
         </div>
         <div className="hidden text-right md:block">
           <div className="text-caption text-ink-tertiary">Raw → Effective</div>
@@ -133,7 +133,7 @@ export function EntropyVisualization({ analysis }: { analysis: AnalysisResult })
               );
             })}
           </ul>
-          <p className="mt-4 font-mono text-[10.5px] text-ink-tertiary">
+          <p className="mt-4 font-mono text-micro text-ink-tertiary">
             Effective entropy = log₂(charset^length) − pattern penalties. NIST guidance
             considers ≥ 60 bits adequate; ≥ 80 bits robust against offline cracking.
           </p>

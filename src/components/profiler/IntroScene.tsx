@@ -17,19 +17,19 @@ export function IntroScene({ onStart, totalQuestions }: { onStart: () => void; t
     >
       <span className="eyebrow">Personal Risk Profiler</span>
       <h1 className="mt-3 text-display-md text-gradient">
-        Find your RiskIndex in 60 seconds.
+        Find your RiskIndex in about a minute.
       </h1>
       <p className="mx-auto mt-4 max-w-xl text-body text-ink-subtle">
-        A short, conversational diagnostic — {totalQuestions} questions,
-        no signup, no data leaves your browser. You'll watch your score
-        evolve live and walk away with a personalized fix plan.
+        Around {totalQuestions} multiple-choice questions about your habits. No signup,
+        nothing sent anywhere. Your score updates as you answer, and you finish with a
+        ranked list of what to change first.
       </p>
 
       {/* Trust strip */}
       <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
         <TrustChip dot="#27a644" label="Runs locally" />
         <TrustChip dot="#5e6ad2" label="No signup" />
-        <TrustChip dot="#a78bfa" label="Live scoring" />
+        <TrustChip dot="#4cc2ff" label="Live scoring" />
       </div>
 
       <motion.button
@@ -54,7 +54,7 @@ export function IntroScene({ onStart, totalQuestions }: { onStart: () => void; t
             className="rounded-xl border border-hairline bg-surface-1/50 p-4 text-left"
           >
             <div
-              className="text-[10px] font-medium uppercase tracking-[0.18em]"
+              className="text-micro font-medium uppercase tracking-[0.18em]"
               style={{ color: p.accent }}
             >
               {p.tag}
@@ -77,8 +77,8 @@ const PREVIEW = [
   },
   {
     tag: 'Attack paths',
-    label: 'See what an attacker would do',
-    detail: 'Probability and weakest-link math model the chains that actually compromise people.',
+    label: 'See how the steps connect',
+    detail: 'A worked model of how one weak habit opens the door to the next.',
     accent: '#f04438',
   },
   {

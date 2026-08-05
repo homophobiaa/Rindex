@@ -41,8 +41,9 @@ export default function Footer() {
         <div className="col-span-2 md:col-span-5">
           <Logo size={26} />
           <p className="mt-4 max-w-sm text-body-sm text-ink-subtle">
-            RIndex is a frontend-only cybersecurity risk analyzer. It runs entirely in your
-            browser — no passwords, answers, or results ever leave your device.
+            RIndex is a static site with no backend. It runs entirely in your browser — no
+            passwords, answers or results leave your device. The only things kept on your
+            device are your display preference and the offline cache.
           </p>
           <div className="mt-5 flex flex-wrap gap-2 text-caption text-ink-tertiary">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-hairline bg-surface-1 px-2.5 py-1">
@@ -62,8 +63,8 @@ export default function Footer() {
 
         {cols.map((col) => (
           <div key={col.title} className="md:col-span-2">
-            <h4 className="mb-3 text-eyebrow uppercase text-ink-subtle">{col.title}</h4>
-            <ul className="space-y-2">
+            <h2 className="mb-3 text-eyebrow uppercase text-ink-subtle">{col.title}</h2>
+            <ul className="space-y-0.5">
               {col.links.map((l) => (
                 <li key={l.label}>
                   {l.external ? (
@@ -71,14 +72,14 @@ export default function Footer() {
                       href={l.to}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="text-body-sm text-ink-muted transition-colors hover:text-ink"
+                      className="-mx-1 inline-flex min-h-[32px] items-center rounded px-1 text-body-sm text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus/60"
                     >
                       {l.label}
                     </a>
                   ) : (
                     <Link
                       to={l.to}
-                      className="text-body-sm text-ink-muted transition-colors hover:text-ink"
+                      className="-mx-1 inline-flex min-h-[32px] items-center rounded px-1 text-body-sm text-ink-muted transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus/60"
                     >
                       {l.label}
                     </Link>

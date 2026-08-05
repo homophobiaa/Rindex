@@ -15,7 +15,7 @@ export function VerdictSummary({ analysis }: { analysis: AnalysisResult }) {
     return (
       <div className="panel-glass gradient-border flex min-h-[200px] flex-col items-center justify-center gap-2 p-8 text-center md:p-10">
         <span className="text-eyebrow uppercase text-ink-subtle">Waiting for input</span>
-        <h3 className="text-card-title text-ink">Type a password above to see your result.</h3>
+        <h2 className="text-card-title text-ink">Type a password above to see your result.</h2>
         <p className="max-w-md text-body-sm text-ink-subtle">
           You can use a demo password or generate a strong one if you don&rsquo;t want
           to type yours.
@@ -115,7 +115,7 @@ function CompactGauge({ score, color }: { score: number; color: string }) {
           decimals={0}
           className="font-mono text-[28px] leading-none tabular-nums text-ink"
         />
-        <span className="mt-0.5 text-[10px] tracking-wider text-ink-tertiary">/ 100</span>
+        <span className="mt-0.5 text-micro tracking-wider text-ink-tertiary">/ 100</span>
       </div>
     </div>
   );

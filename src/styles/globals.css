@@ -53,6 +53,13 @@
     pointer-events: none;
   }
 
+  /* Superscripts/subscripts inherit 0.75em, which drops small text below a
+     readable size. Give them a floor. */
+  sup,
+  sub {
+    font-size: max(0.75em, 10px);
+  }
+
   /* Subtle scrollbar */
   ::-webkit-scrollbar {
     width: 10px;

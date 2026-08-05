@@ -9,6 +9,8 @@ import { KIND_META, SEVERITY_COLOR } from '@/lib/attack-paths/types';
 import type { CurrentStepInfo } from '@/lib/attack-paths/simulation';
 import { formatPct } from '@/lib/attack-paths/simulation';
 import { KIND_ICONS } from './nodes/icons';
+import { useIsWide } from '@/lib/use-media-query';
+import { useMotionTransition } from '@/lib/motion';
 import { cn } from '@/lib/cn';
 
 interface DetailsPanelProps {
@@ -33,19 +35,23 @@ export function DetailsPanel({
   const selected = selectedNodeId
     ? scenario.nodes.find((n) => n.id === selectedNodeId) ?? null
     : null;
+  // Below lg the panel is a full-width block stacked under the graph, so the
+  // animated fixed width (and the collapse rail) only apply on wide screens.
+  const isWide = useIsWide();
+  const panelTransition = useMotionTransition({ duration: 0.32, ease: EASE });
 
   return (
     <motion.aside
-      animate={{ width: open ? 360 : 36 }}
-      transition={{ duration: 0.32, ease: EASE }}
-      className="relative h-full shrink-0 overflow-hidden rounded-l-xl border border-hairline bg-surface-1/85 backdrop-blur-xl"
+      animate={isWide ? { width: open ? 360 : 36 } : { width: '100%' }}
+      transition={panelTransition}
+      className="relative w-full shrink-0 overflow-hidden border-hairline bg-surface-1/85 backdrop-blur-xl lg:h-full lg:rounded-l-xl lg:border"
     >
-      {/* Collapse handle */}
+      {/* Collapse handle — only meaningful in the side-drawer layout */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? 'Collapse details' : 'Expand details'}
-        className="absolute right-0 top-0 z-10 flex h-9 w-9 items-center justify-center text-ink-tertiary transition-colors hover:text-ink"
+        className="absolute right-0 top-0 z-10 hidden h-9 w-9 items-center justify-center text-ink-tertiary transition-colors hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus/60 lg:flex"
       >
         <svg
           viewBox="0 0 24 24"
@@ -61,19 +67,19 @@ export function DetailsPanel({
       </button>
 
       {/* Collapsed rail label */}
-      {!open && (
+      {!open && isWide && (
         <div className="flex h-full items-center justify-center">
-          <span className="rotate-180 text-[10px] font-medium uppercase tracking-[0.22em] text-ink-tertiary [writing-mode:vertical-rl]">
+          <span className="rotate-180 text-micro font-medium uppercase tracking-[0.22em] text-ink-tertiary [writing-mode:vertical-rl]">
             Details
           </span>
         </div>
       )}
 
       {/* Open contents */}
-      {open && (
-        <div className="flex h-full w-[360px] flex-col">
+      {(open || !isWide) && (
+        <div className="flex w-full flex-col lg:h-full lg:w-[360px]">
           <header className="flex items-center justify-between border-b border-hairline px-4 py-3">
-            <span className="text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+            <span className="text-micro font-medium uppercase tracking-wider text-ink-tertiary">
               {selected ? 'Node inspector' : 'Scenario overview'}
             </span>
           </header>
@@ -135,14 +141,14 @@ function NodeDetails({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <span
-              className="text-[10px] font-medium uppercase tracking-wider"
+              className="text-micro font-medium uppercase tracking-wider"
               style={{ color: meta.color }}
             >
               {meta.badge}
             </span>
             {node.severity && (
               <span
-                className="rounded px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider"
+                className="rounded px-1.5 py-0.5 text-micro font-semibold uppercase tracking-wider"
                 style={{
                   background: `${SEVERITY_COLOR[node.severity]}1a`,
                   color: SEVERITY_COLOR[node.severity],
@@ -152,9 +158,9 @@ function NodeDetails({
               </span>
             )}
           </div>
-          <h3 className="mt-0.5 text-[14.5px] font-medium leading-snug text-ink">
+          <h2 className="mt-0.5 text-[14.5px] font-medium leading-snug text-ink">
             {node.title}
-          </h3>
+          </h2>
           <p className="mt-1 text-[12px] leading-relaxed text-ink-subtle">
             {node.short}
           </p>
@@ -192,7 +198,7 @@ function NodeDetails({
                   {e.from ?? 'upstream'}
                   {e.label && <span className="ml-1 text-ink-tertiary">— {e.label}</span>}
                 </span>
-                <span className="font-mono text-[10.5px] tabular-nums text-ink-subtle">
+                <span className="font-mono text-micro tabular-nums text-ink-subtle">
                   {formatPct(e.probability)}
                 </span>
               </li>
@@ -204,7 +210,7 @@ function NodeDetails({
                   {e.to ?? 'downstream'}
                   {e.label && <span className="ml-1 text-ink-tertiary">— {e.label}</span>}
                 </span>
-                <span className="font-mono text-[10.5px] tabular-nums text-ink-subtle">
+                <span className="font-mono text-micro tabular-nums text-ink-subtle">
                   {formatPct(e.probability)}
                 </span>
               </li>
@@ -250,7 +256,7 @@ function ScenarioDetails({
       className="space-y-4"
     >
       <div>
-        <h3 className="text-[15px] font-medium leading-snug text-ink">{scenario.title}</h3>
+        <h2 className="text-[15px] font-medium leading-snug text-ink">{scenario.title}</h2>
         <p className="mt-1.5 text-[12.5px] leading-relaxed text-ink-subtle">
           {scenario.description ?? scenario.tagline}
         </p>
@@ -260,7 +266,7 @@ function ScenarioDetails({
         {currentStep.node ? (
           <>
             <div className="rounded-md border border-hairline bg-surface-2/60 p-2.5">
-              <div className="font-mono text-[10px] uppercase tracking-wider text-ink-tertiary">
+              <div className="font-mono text-micro uppercase tracking-wider text-ink-tertiary">
                 {currentStep.stageLabel ?? `Stage ${currentStep.index}`}
               </div>
               <div className="mt-0.5 text-[12.5px] font-medium text-ink">
@@ -299,14 +305,14 @@ function ScenarioDetails({
                     : 'border-transparent text-ink-muted',
                 )}
               >
-                <span className="font-mono text-[10px] tabular-nums text-ink-tertiary">
+                <span className="font-mono text-micro tabular-nums text-ink-tertiary">
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span className="flex-1 truncate">
                   {n?.data.title ?? id}
                 </span>
                 {scenario.stageLabels?.[i] && (
-                  <span className="text-[10px] uppercase tracking-wider text-ink-tertiary">
+                  <span className="text-micro uppercase tracking-wider text-ink-tertiary">
                     {scenario.stageLabels[i]}
                   </span>
                 )}
@@ -328,7 +334,7 @@ function ScenarioDetails({
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section>
-      <div className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+      <div className="mb-1.5 text-micro font-medium uppercase tracking-wider text-ink-tertiary">
         {title}
       </div>
       {children}
@@ -345,7 +351,7 @@ function Meter({ value, color }: { value: number; color: string }) {
           style={{ width: `${Math.round(value * 100)}%`, background: color }}
         />
       </div>
-      <span className="font-mono text-[10.5px] tabular-nums text-ink-subtle">
+      <span className="font-mono text-micro tabular-nums text-ink-subtle">
         {Math.round(value * 100)}%
       </span>
     </div>

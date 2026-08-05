@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FACTORS,
-  PILLARS,
   attackProbability,
   compositeScore,
   defaultFactorState,
@@ -13,6 +12,7 @@ import {
   type FactorState,
 } from '@/lib/risk';
 import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
+import { SwitchTrack } from '@/components/ui/Switch';
 
 /**
  * Interactive scoring demo.
@@ -21,8 +21,8 @@ import { AnimatedNumber } from '@/components/ui/AnimatedNumber';
  * per-pillar bars, and attacker-success probability all recompute live
  * via the shared scoring engine in `@/lib/risk`.
  *
- * Same engine the future Personal Risk Profiler will consume — there is
- * no demo-only math here.
+ * Same engine the assessment and dashboard consume — there is no
+ * demo-only math here.
  */
 export function ScoreSimulator() {
   const [state, setState] = useState<FactorState>(() => defaultFactorState());
@@ -83,7 +83,7 @@ export function ScoreSimulator() {
       <aside className="lg:sticky lg:top-24 lg:self-start">
         <div className="overflow-hidden rounded-xl border border-hairline bg-surface-1/70 p-4 backdrop-blur-sm">
           <div className="flex items-baseline justify-between">
-            <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+            <span className="text-micro font-medium uppercase tracking-[0.18em] text-ink-tertiary">
               RiskIndex
             </span>
             <AnimatePresence mode="wait">
@@ -93,7 +93,7 @@ export function ScoreSimulator() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 4 }}
                 transition={{ duration: 0.25 }}
-                className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                className="rounded-full px-2 py-0.5 text-micro font-medium"
                 style={{
                   color: accent,
                   background: `${accent}1a`,
@@ -125,18 +125,21 @@ export function ScoreSimulator() {
             />
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-2 text-[11px]">
-            <Tile label="Attack-success P" value={`${(attackP * 100).toFixed(0)}%`} accent={accent} />
-            <Tile
-              label="Composite weight"
-              value={`${PILLARS.length} pillars`}
-              accent="#5e6ad2"
-            />
+          <div className="mt-4 rounded-md border border-hairline bg-surface-2/40 px-3 py-2">
+            <div className="text-caption uppercase tracking-wider text-ink-tertiary">
+              Modeled attack success
+            </div>
+            <div className="mt-0.5 flex items-baseline gap-2">
+              <span className="font-mono text-[18px] tabular-nums" style={{ color: accent }}>
+                {(attackP * 100).toFixed(0)}%
+              </span>
+              <span className="text-caption text-ink-tertiary">at this score</span>
+            </div>
           </div>
 
           {/* Pillar bars */}
           <div className="mt-4 space-y-2">
-            <div className="text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+            <div className="text-micro font-medium uppercase tracking-wider text-ink-tertiary">
               Per-pillar score
             </div>
             {breakdown.map((b) => (
@@ -182,7 +185,7 @@ function ToggleGroup({
       <div className="mb-3 flex items-baseline justify-between">
         <h3 className="text-[13px] font-medium text-ink">{title}</h3>
         <span
-          className="text-[10px] font-medium uppercase tracking-wider"
+          className="text-micro font-medium uppercase tracking-wider"
           style={{ color: accent }}
         >
           {subtitle}
@@ -227,7 +230,7 @@ function FactorRow({
             {label}
           </span>
           <span
-            className="font-mono text-[10px] tabular-nums"
+            className="font-mono text-micro tabular-nums"
             style={{ color: on ? color : '#62666d' }}
           >
             {sign}
@@ -236,41 +239,9 @@ function FactorRow({
         </div>
         <p className="mt-0.5 text-[11px] leading-snug text-ink-tertiary">{description}</p>
       </div>
-      <Switch on={on} />
+      {/* Presentational only — the whole row is the button, and it already
+          carries aria-pressed. */}
+      <SwitchTrack on={on} className="mt-0.5" />
     </button>
-  );
-}
-
-function Switch({ on }: { on: boolean }) {
-  return (
-    <span
-      aria-hidden
-      className={
-        on
-          ? 'mt-0.5 flex h-4 w-7 shrink-0 items-center rounded-full bg-primary/80 px-0.5'
-          : 'mt-0.5 flex h-4 w-7 shrink-0 items-center rounded-full bg-surface-4 px-0.5'
-      }
-    >
-      <motion.span
-        layout
-        transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-        className={
-          on
-            ? 'ml-auto h-3 w-3 rounded-full bg-white shadow-glow-soft'
-            : 'h-3 w-3 rounded-full bg-ink-tertiary'
-        }
-      />
-    </span>
-  );
-}
-
-function Tile({ label, value, accent }: { label: string; value: string; accent: string }) {
-  return (
-    <div className="rounded-md border border-hairline bg-surface-2/40 px-2 py-1.5">
-      <div className="text-[9.5px] uppercase tracking-wider text-ink-tertiary">{label}</div>
-      <div className="mt-0.5 font-mono text-[13px] tabular-nums" style={{ color: accent }}>
-        {value}
-      </div>
-    </div>
   );
 }

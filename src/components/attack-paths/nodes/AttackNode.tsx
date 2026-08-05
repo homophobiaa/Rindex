@@ -78,7 +78,7 @@ function AttackNodeImpl({ data, selected }: NodeProps<AttackNodeData>) {
               <Icon className="h-3.5 w-3.5" />
             </span>
             <span
-              className="text-[10px] font-medium uppercase tracking-wider"
+              className="text-micro font-medium uppercase tracking-wider"
               style={{ color: meta.color }}
             >
               {meta.badge}
@@ -86,7 +86,7 @@ function AttackNodeImpl({ data, selected }: NodeProps<AttackNodeData>) {
           </div>
           {data.severity && (
             <span
-              className="rounded px-1.5 py-0.5 text-[9.5px] font-semibold uppercase tracking-wider"
+              className="rounded px-1.5 py-0.5 text-micro font-semibold uppercase tracking-wider"
               style={{
                 background: `${SEVERITY_COLOR[data.severity]}1a`,
                 color: SEVERITY_COLOR[data.severity],
@@ -119,7 +119,7 @@ function AttackNodeImpl({ data, selected }: NodeProps<AttackNodeData>) {
                 }}
               />
             </div>
-            <span className="font-mono text-[10px] tabular-nums text-ink-tertiary">
+            <span className="font-mono text-micro tabular-nums text-ink-tertiary">
               {Math.round(data.successProb * 100)}%
             </span>
           </div>

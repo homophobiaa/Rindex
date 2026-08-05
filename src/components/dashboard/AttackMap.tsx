@@ -114,7 +114,7 @@ function AttackMapInner({ state }: { state: FactorState }) {
             >
               <div className="flex items-center gap-2">
                 <span
-                  className="rounded px-1.5 py-0.5 text-[9.5px] font-medium uppercase tracking-wider"
+                  className="rounded px-1.5 py-0.5 text-micro font-medium uppercase tracking-wider"
                   style={{
                     color: KIND_META[selected.kind].color,
                     background: `${KIND_META[selected.kind].color}1a`,
@@ -134,7 +134,7 @@ function AttackMapInner({ state }: { state: FactorState }) {
       </div>
 
       {/* Legend / helper */}
-      <div className="flex flex-wrap items-center gap-3 border-t border-hairline px-4 py-2.5 text-[10.5px] text-ink-tertiary">
+      <div className="flex flex-wrap items-center gap-3 border-t border-hairline px-4 py-2.5 text-micro text-ink-tertiary">
         <LegendDot color="#f04438" label="weakness" />
         <LegendDot color="#27a644" label="active defense" />
         <LegendDot color="#d8341c" label="impact" />
@@ -151,7 +151,7 @@ function Stat({ color, label, value }: { color: string; label: string; value: nu
     <span className="flex items-center gap-1.5">
       <span className="h-1.5 w-1.5 rounded-full" style={{ background: color }} />
       <span className="font-mono text-[11px] tabular-nums text-ink">{value}</span>
-      <span className="text-[10.5px] text-ink-tertiary">{label}</span>
+      <span className="text-micro text-ink-tertiary">{label}</span>
     </span>
   );
 }

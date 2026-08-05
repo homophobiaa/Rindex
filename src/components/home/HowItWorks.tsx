@@ -6,23 +6,23 @@ import { fadeUp, staggerContainer } from '@/lib/motion';
 const steps = [
   {
     n: '01',
-    title: 'Interactive questionnaire',
-    desc: 'Six categories — password habits, 2FA, phishing, devices, privacy and recovery. Fast, animated, no walls of text.',
+    title: 'Answer a few questions',
+    desc: 'Six areas: password habits, two-factor, recovery, devices, exposure and everyday behavior. Multiple choice, no long forms.',
   },
   {
     n: '02',
-    title: 'Cryptographic analysis',
-    desc: 'Password entropy estimated from charset, length, patterns and dictionary detection — using log₂ of the effective search space.',
+    title: 'Score the answers',
+    desc: 'Each answer maps to a weighted factor. The six areas combine into one number between 0 and 100.',
   },
   {
     n: '03',
-    title: 'Risk graph construction',
-    desc: 'Your weaknesses are connected as a weighted directed graph showing how attackers chain vulnerabilities.',
+    title: 'Map the weak points',
+    desc: 'Your answers drive a graph showing how one weak habit leads to the next, and which step matters most.',
   },
   {
     n: '04',
-    title: 'Personalized action plan',
-    desc: 'Ranked recommendations by impact, difficulty and risk reduction. Mathematically explainable, never hand-wavy.',
+    title: 'Get an ordered fix list',
+    desc: 'Recommendations sorted by how many points each one would remove, so you know what to do first.',
   },
 ];
 
@@ -33,11 +33,11 @@ export function HowItWorks() {
         <div className="mx-auto max-w-2xl text-center">
           <Eyebrow>How it works</Eyebrow>
           <h2 className="mt-4 text-balance text-display-md text-gradient md:text-display-lg">
-            From a quick check to a complete attack-path map.
+            Four steps, and you can check the math on every one.
           </h2>
           <p className="mt-4 text-body-lg text-ink-subtle">
-            RIndex turns vague worries into a concrete, mathematically-grounded picture of your
-            personal attack surface.
+            Nothing here is a black box. The Methodology page shows the weights and formulas
+            behind each number.
           </p>
         </div>
 
@@ -48,7 +48,7 @@ export function HowItWorks() {
           viewport={{ once: true, amount: 0.15 }}
           className="mt-14 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4"
         >
-          {steps.map((s, i) => (
+          {steps.map((s) => (
             <motion.li
               key={s.n}
               variants={fadeUp}
@@ -62,11 +62,6 @@ export function HowItWorks() {
               </div>
               <h3 className="mt-4 text-card-title text-ink">{s.title}</h3>
               <p className="mt-2 text-body-sm text-ink-subtle">{s.desc}</p>
-              <div className="mt-6 h-px w-full bg-gradient-to-r from-hairline via-primary/30 to-transparent" />
-              <div className="mt-3 flex items-center justify-between text-caption text-ink-tertiary">
-                <span>Stage</span>
-                <span className="font-mono">{i + 1} / {steps.length}</span>
-              </div>
             </motion.li>
           ))}
         </motion.ol>

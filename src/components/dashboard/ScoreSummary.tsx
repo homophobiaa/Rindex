@@ -74,14 +74,14 @@ export function ScoreSummary({
                 duration={1.3}
                 className="text-[40px] font-semibold leading-none tabular-nums text-ink"
               />
-              <div className="mt-0.5 text-[10px] uppercase tracking-[0.16em] text-ink-tertiary">
+              <div className="mt-0.5 text-micro uppercase tracking-[0.16em] text-ink-tertiary">
                 / 100
               </div>
             </div>
           </div>
 
           <div className="min-w-0">
-            <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+            <span className="text-micro font-medium uppercase tracking-[0.18em] text-ink-tertiary">
               RiskIndex
             </span>
             <div
@@ -108,7 +108,7 @@ export function ScoreSummary({
 
       {/* 5-second action card */}
       <div className="flex flex-col gap-3 rounded-2xl border border-hairline bg-surface-1/50 p-6">
-        <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+        <span className="text-micro font-medium uppercase tracking-[0.18em] text-ink-tertiary">
           Read this first
         </span>
 
@@ -172,12 +172,12 @@ function FocusRow({
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
-          <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-ink-tertiary">
+          <span className="text-micro font-medium uppercase tracking-[0.14em] text-ink-tertiary">
             {label}
           </span>
           {badge && (
             <span
-              className="shrink-0 rounded-full px-1.5 py-0.5 text-[9.5px] font-medium"
+              className="shrink-0 rounded-full px-1.5 py-0.5 text-micro font-medium"
               style={{ background: `${accent}1a`, color: accent }}
             >
               {badge}
@@ -194,7 +194,7 @@ function FocusRow({
 function Metric({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-[9.5px] font-medium uppercase tracking-[0.16em] text-ink-tertiary">
+      <div className="text-micro font-medium uppercase tracking-[0.16em] text-ink-tertiary">
         {label}
       </div>
       <div className="mt-0.5 font-mono text-[18px] tabular-nums text-ink">{value}</div>
@@ -220,8 +220,8 @@ function ConfidenceChip({
   return (
     <div className="flex items-center gap-2">
       <div className="text-right">
-        <div className="text-[9.5px] font-medium uppercase tracking-[0.16em] text-ink-tertiary">
-          Confidence
+        <div className="text-micro font-medium uppercase tracking-[0.16em] text-ink-tertiary">
+          Answered
         </div>
         <div className="mt-0.5 text-[12px] font-medium text-ink">{label}</div>
       </div>

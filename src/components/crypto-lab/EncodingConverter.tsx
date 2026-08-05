@@ -113,7 +113,7 @@ export function EncodingConverter() {
               )}
               <span className="relative">
                 {f.label}
-                <span className="ml-1.5 hidden text-[10px] text-ink-tertiary sm:inline">
+                <span className="ml-1.5 hidden text-micro text-ink-tertiary sm:inline">
                   ({f.base})
                 </span>
               </span>
@@ -132,7 +132,7 @@ export function EncodingConverter() {
       >
         <div className="mb-2 flex items-center justify-between">
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-wider text-primary">
+            <div className="text-micro font-medium uppercase tracking-wider text-primary">
               {activeMeta.label} · {activeMeta.base}
             </div>
             <div className="mt-0.5 text-[11px] text-ink-subtle">{activeMeta.hint}</div>
@@ -165,7 +165,7 @@ function Counter({
 }) {
   return (
     <div>
-      <div className="text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+      <div className="text-micro font-medium uppercase tracking-wider text-ink-tertiary">
         {label}
       </div>
       <div

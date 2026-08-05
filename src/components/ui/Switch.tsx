@@ -13,11 +13,45 @@ type SwitchProps = {
 };
 
 /**
+ * The switch visual, with no semantics of its own.
+ *
+ * Used directly by `Switch`, and reused by controls where the whole row is
+ * already the interactive element (and carries its own `aria-pressed`), so
+ * that both render an identical track and knob.
+ */
+export function SwitchTrack({
+  on,
+  className,
+}: {
+  on: boolean;
+  className?: string;
+}) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        'relative inline-flex h-[22px] w-[38px] shrink-0 items-center rounded-full border p-px',
+        'transition-colors duration-200 ease-out',
+        on
+          ? 'border-primary/70 bg-primary shadow-glow-soft'
+          : 'border-hairline-strong bg-surface-3',
+        className,
+      )}
+    >
+      <span
+        className={cn(
+          'block h-[18px] w-[18px] rounded-full bg-ink shadow-sm',
+          'transition-transform duration-200 ease-out',
+          on ? 'translate-x-[16px]' : 'translate-x-0',
+        )}
+      />
+    </span>
+  );
+}
+
+/**
  * Toggle switch built from a native button so keyboard support
  * (Space / Enter) and focus handling come for free.
- *
- * Visual language matches Button: hairline border at rest, primary fill
- * with soft glow when on, and the same focus ring treatment.
  */
 export function Switch({
   checked,
@@ -37,25 +71,15 @@ export function Switch({
       {...aria}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        'group relative inline-flex h-[22px] w-[38px] shrink-0 items-center rounded-full border p-px',
-        'transition-colors duration-200 ease-out',
+        'group inline-flex shrink-0 rounded-full',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus/60',
         'focus-visible:ring-offset-2 focus-visible:ring-offset-canvas',
         'disabled:cursor-not-allowed disabled:opacity-50',
-        checked
-          ? 'border-primary/70 bg-primary shadow-glow-soft'
-          : 'border-hairline-strong bg-surface-3 hover:border-ink-tertiary',
+        !disabled && 'hover:brightness-110',
         className,
       )}
     >
-      <span
-        aria-hidden
-        className={cn(
-          'pointer-events-none block h-[18px] w-[18px] rounded-full bg-ink shadow-sm',
-          'transition-transform duration-200 ease-out',
-          checked ? 'translate-x-[16px]' : 'translate-x-0',
-        )}
-      />
+      <SwitchTrack on={checked} />
     </button>
   );
 }

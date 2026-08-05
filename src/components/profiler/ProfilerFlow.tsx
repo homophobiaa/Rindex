@@ -182,7 +182,7 @@ export function ProfilerFlow() {
           >
             <div>
               <span
-                className="text-[10.5px] font-medium uppercase tracking-[0.18em]"
+                className="text-micro font-medium uppercase tracking-[0.18em]"
                 style={{ color: step.accent }}
               >
                 {step.eyebrow}

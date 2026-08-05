@@ -78,7 +78,7 @@ export function ScorePanel({ analysis }: { analysis: AnalysisResult }) {
         </div>
 
         <div className="flex-1">
-          <h3 className="text-card-title text-ink">{meta.description}</h3>
+          <h3 className="text-body-lg font-medium text-ink">{meta.description}</h3>
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
             <Stat label="Entropy" value={`${analysis.effectiveEntropyBits.toFixed(1)} b`} mono />
             <Stat label="Length" value={analysis.length.toString()} mono />
@@ -104,7 +104,7 @@ export function ScorePanel({ analysis }: { analysis: AnalysisResult }) {
 function Stat({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="rounded-md border border-hairline-tertiary bg-surface-2/60 px-3 py-2">
-      <div className="text-[10.5px] uppercase tracking-wider text-ink-tertiary">{label}</div>
+      <div className="text-micro uppercase tracking-wider text-ink-tertiary">{label}</div>
       <div className={`mt-1 text-[15px] text-ink ${mono ? 'font-mono tabular-nums' : ''}`}>
         {value}
       </div>

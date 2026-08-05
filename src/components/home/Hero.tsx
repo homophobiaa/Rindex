@@ -21,7 +21,7 @@ export function Hero() {
           className="mx-auto flex max-w-4xl flex-col items-center text-center"
         >
           <motion.div variants={fadeUp}>
-            <Eyebrow>Cybersecurity risk analysis · built for your browser</Eyebrow>
+            <Eyebrow>Personal security check · runs in your browser</Eyebrow>
           </motion.div>
 
           <motion.h1
@@ -37,9 +37,9 @@ export function Hero() {
             variants={fadeUp}
             className="mt-6 max-w-2xl text-pretty text-body-lg text-ink-muted"
           >
-            RIndex analyzes your password strength, phishing awareness, account protection and
-            digital habits using cryptographic entropy and graph-based risk analysis — entirely
-            inside your browser. No data leaves your device.
+            Answer a few questions about your passwords, two-factor setup, recovery options
+            and devices. RIndex turns them into a single score, shows the reasoning, and
+            tells you what to fix first — entirely inside your browser.
           </motion.p>
 
           <motion.div variants={fadeUp} className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -60,7 +60,7 @@ export function Hero() {
           >
             <span className="inline-flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
-              100% local browser processing
+              Everything computed on your device
             </span>
             <span className="inline-flex items-center gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-success" />
@@ -81,6 +81,9 @@ export function Hero() {
           className="relative mx-auto mt-16 max-w-5xl"
         >
           <HeroVisual />
+          <p className="mt-3 text-center text-caption text-ink-tertiary">
+            Illustration of the results screen. The figures shown are examples, not real data.
+          </p>
         </motion.div>
       </Container>
     </section>

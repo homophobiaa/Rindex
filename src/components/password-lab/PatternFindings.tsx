@@ -9,9 +9,9 @@ export function PatternFindings({ analysis }: { analysis: AnalysisResult }) {
       <div className="flex items-end justify-between gap-4">
         <div>
           <span className="text-eyebrow uppercase text-ink-subtle">Pattern detection</span>
-          <h3 className="mt-1 text-card-title text-ink">
+          <h2 className="mt-1 text-card-title text-ink">
             What attackers would notice
-          </h3>
+          </h2>
         </div>
         <span className="rounded-md border border-hairline-tertiary bg-surface-2 px-2 py-1 font-mono text-[12px] text-ink-muted">
           {analysis.patterns.length} finding{analysis.patterns.length === 1 ? '' : 's'}
@@ -94,12 +94,12 @@ function FindingCard({ finding, index }: { finding: PatternFinding; index: numbe
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
           <span
-            className="rounded-md px-1.5 py-0.5 text-[10.5px] uppercase tracking-wider"
+            className="rounded-md px-1.5 py-0.5 text-micro uppercase tracking-wider"
             style={{ background: `${tone.color}1f`, color: tone.color }}
           >
             {finding.severity}
           </span>
-          <span className="font-mono text-[10.5px] text-ink-tertiary">
+          <span className="font-mono text-micro text-ink-tertiary">
             −{finding.penaltyBits.toFixed(1)} bits
           </span>
         </div>

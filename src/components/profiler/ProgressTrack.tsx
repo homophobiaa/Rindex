@@ -46,10 +46,10 @@ export function ProgressTrack({
               <span
                 className={
                   isActive
-                    ? 'text-[10px] font-medium tracking-wider text-ink'
+                    ? 'text-micro font-medium tracking-wider text-ink'
                     : isDone
-                      ? 'text-[10px] font-medium tracking-wider text-ink-muted'
-                      : 'text-[10px] font-medium tracking-wider text-ink-tertiary'
+                      ? 'text-micro font-medium tracking-wider text-ink-muted'
+                      : 'text-micro font-medium tracking-wider text-ink-tertiary'
                 }
               >
                 {step.label}

@@ -49,11 +49,10 @@ export function HeroVisual() {
             <span className="h-2.5 w-2.5 rounded-full bg-surface-4" />
           </div>
           <div className="font-mono text-[11px] text-ink-tertiary">
-            rindex.local / assessment / results
+            rindex / assessment / results
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] text-ink-subtle">
-            <span className="h-1.5 w-1.5 rounded-full bg-success" />
-            Local
+          <div className="flex items-center gap-1.5 text-[11px] text-ink-tertiary">
+            Example
           </div>
         </div>
 
@@ -62,7 +61,7 @@ export function HeroVisual() {
           <div className="panel md:col-span-5 p-5">
             <div className="flex items-center justify-between">
               <div className="eyebrow">RIndex Score</div>
-              <span className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[10px] font-medium text-warning">
+              <span className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-micro font-medium text-warning">
                 HIGH RISK
               </span>
             </div>
@@ -79,10 +78,10 @@ export function HeroVisual() {
 
             <div className="mt-4 grid grid-cols-2 gap-2 text-[11px]">
               {[
-                { k: 'Confidence', v: '94%' },
-                { k: 'Profile', v: 'Personal' },
-                { k: 'Signals', v: '23' },
-                { k: 'Updated', v: 'just now' },
+                { k: 'Answered', v: '10 / 10' },
+                { k: 'Pillars', v: '6' },
+                { k: 'Top risk', v: 'Reuse' },
+                { k: 'Fixes', v: '4' },
               ].map((s) => (
                 <div key={s.k} className="flex items-center justify-between rounded-md border border-hairline-tertiary bg-surface-2/60 px-2.5 py-1.5">
                   <span className="text-ink-tertiary">{s.k}</span>
@@ -97,7 +96,6 @@ export function HeroVisual() {
             <div className="panel p-5">
               <div className="mb-3 flex items-center justify-between">
                 <div className="eyebrow">Category breakdown</div>
-                <span className="font-mono text-[11px] text-ink-tertiary">live</span>
               </div>
               <SubscoreList />
             </div>
@@ -109,7 +107,7 @@ export function HeroVisual() {
                   <span className="font-mono text-headline tabular-nums text-ink">52.3</span>
                   <span className="text-caption text-ink-subtle">bits</span>
                 </div>
-                <div className="mt-2 font-mono text-[10.5px] leading-relaxed text-ink-tertiary">
+                <div className="mt-2 font-mono text-caption leading-relaxed text-ink-tertiary">
                   search space ≈ 2<sup>52.3</sup>
                   <br />
                   ≈ 5.7 × 10<sup>15</sup> combinations
@@ -269,7 +267,7 @@ function MiniGraph() {
           initial={{ opacity: 0, scale: 0.6 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={reduceMotion ? { duration: 0 } : { duration: 0.4, delay: 0.5 + i * 0.15 }}
-          className="absolute -translate-x-1/2 -translate-y-1/2 rounded-md border border-hairline bg-surface-2 px-1.5 py-0.5 text-[9.5px] text-ink-muted shadow-glow-soft"
+          className="absolute -translate-x-1/2 -translate-y-1/2 rounded-md border border-hairline bg-surface-2 px-1.5 py-0.5 text-micro text-ink-muted shadow-glow-soft"
           style={{ left: `${(n.x / 120) * 100}%`, top: `${(n.y / 80) * 100}%` }}
         >
           {n.label}

@@ -106,10 +106,11 @@ export function confidenceFor(answeredCount: number, totalQuestions: number): Co
   let level: Confidence['level'] = 'low';
   if (ratio >= 0.99) level = 'high';
   else if (ratio >= 0.6) level = 'medium';
+  // This is completion, not statistical confidence — the label says so.
   const label =
-    level === 'high' ? 'High confidence' :
-    level === 'medium' ? 'Partial profile' :
-    'Low confidence';
+    level === 'high' ? 'All answered' :
+    level === 'medium' ? 'Partly answered' :
+    'Barely answered';
   return { ratio, level, label };
 }
 

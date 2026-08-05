@@ -63,7 +63,7 @@ export function BruteForceSim() {
                 }
               >
                 <span className="text-[12px]">{c.label}</span>
-                <span className="font-mono text-[10.5px] tabular-nums text-ink-tertiary">
+                <span className="font-mono text-micro tabular-nums text-ink-tertiary">
                   {c.size}
                 </span>
               </button>
@@ -87,7 +87,7 @@ export function BruteForceSim() {
             onChange={(e) => setLength(parseInt(e.target.value, 10))}
             className="lab-range mt-2 w-full accent-primary"
           />
-          <div className="mt-1 flex justify-between font-mono text-[10px] text-ink-tertiary">
+          <div className="mt-1 flex justify-between font-mono text-micro text-ink-tertiary">
             <span>4</span>
             <span>16</span>
           </div>
@@ -114,7 +114,7 @@ export function BruteForceSim() {
                 <div className="flex items-baseline justify-between text-[12px]">
                   <span>{a.label}</span>
                 </div>
-                <div className="text-[10.5px] text-ink-tertiary">{a.description}</div>
+                <div className="text-micro text-ink-tertiary">{a.description}</div>
               </button>
             ))}
           </div>
@@ -141,7 +141,7 @@ export function BruteForceSim() {
       <div className="rounded-lg border border-hairline bg-surface-2/40 p-4">
         <div className="mb-2 flex items-baseline justify-between">
           <div>
-            <div className="text-[10px] font-medium uppercase tracking-wider text-primary">
+            <div className="text-micro font-medium uppercase tracking-wider text-primary">
               Exponential growth
             </div>
             <div className="mt-0.5 text-[11px] text-ink-subtle">
@@ -150,7 +150,7 @@ export function BruteForceSim() {
           </div>
           {yourRow && (
             <div className="text-right">
-              <div className="text-[10px] uppercase tracking-wider text-ink-tertiary">
+              <div className="text-micro uppercase tracking-wider text-ink-tertiary">
                 Length {length}
               </div>
               <div className="font-mono text-[13px] tabular-nums text-ink">
@@ -180,21 +180,21 @@ export function BruteForceSim() {
                 <span
                   className={
                     isCurrent
-                      ? 'mt-1 font-mono text-[10px] tabular-nums text-danger'
-                      : 'mt-1 font-mono text-[10px] tabular-nums text-ink-tertiary'
+                      ? 'mt-1 font-mono text-micro tabular-nums text-danger'
+                      : 'mt-1 font-mono text-micro tabular-nums text-ink-tertiary'
                   }
                 >
                   {row.length}
                 </span>
                 {/* Tooltip on hover */}
-                <div className="pointer-events-none absolute bottom-full mb-1 hidden whitespace-nowrap rounded border border-hairline bg-surface-1/95 px-2 py-1 text-[10px] text-ink-muted shadow-lg group-hover:block">
+                <div className="pointer-events-none absolute bottom-full mb-1 hidden whitespace-nowrap rounded border border-hairline bg-surface-1/95 px-2 py-1 text-micro text-ink-muted shadow-lg group-hover:block">
                   10^{row.log10.toFixed(1)} · {humanizeSeconds(row.seconds)}
                 </div>
               </div>
             );
           })}
         </div>
-        <div className="mt-1.5 text-[10px] text-ink-tertiary">
+        <div className="mt-1.5 text-micro text-ink-tertiary">
           Bar height = log10(combinations). Each added character is a full
           step taller — that\u2019s exponential.
         </div>
@@ -220,7 +220,7 @@ function ControlBlock({
 }) {
   return (
     <div className="rounded-lg border border-hairline bg-surface-2/40 p-3.5">
-      <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+      <div className="mb-2 text-micro font-medium uppercase tracking-wider text-ink-tertiary">
         {title}
       </div>
       {children}
@@ -241,7 +241,7 @@ function BigMetric({
 }) {
   return (
     <div className="rounded-lg border border-hairline bg-surface-1/60 px-4 py-3.5">
-      <div className="text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+      <div className="text-micro font-medium uppercase tracking-wider text-ink-tertiary">
         {label}
       </div>
       <motion.div

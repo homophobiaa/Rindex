@@ -109,10 +109,10 @@ export default function CryptoLab() {
           transition={{ duration: 0.6 }}
           className="mx-auto mt-24 max-w-2xl text-center"
         >
-          <p className="text-[12px] leading-relaxed text-ink-tertiary">
-            Every computation in this lab runs locally in your browser via
-            the Web Crypto API and pure JavaScript. No input is ever sent,
-            stored, or logged.
+          <p className="text-caption leading-relaxed text-ink-tertiary">
+            Every computation in this lab runs in this page, using the browser&rsquo;s
+            built-in Web Crypto API and plain JavaScript. What you type is never sent
+            anywhere and is never saved.
           </p>
         </motion.footer>
       </div>

@@ -54,7 +54,7 @@ export function CaesarDemo() {
             onChange={(e) => setShift(parseInt(e.target.value, 10))}
             className="lab-range w-full accent-primary"
           />
-          <div className="mt-1 flex justify-between text-[10px] text-ink-tertiary">
+          <div className="mt-1 flex justify-between text-micro text-ink-tertiary">
             <span>0</span>
             <span>25</span>
           </div>
@@ -64,7 +64,7 @@ export function CaesarDemo() {
       {/* Ciphertext */}
       <div className="rounded-lg border border-hairline bg-surface-2/40 p-3.5">
         <div className="mb-1.5 flex items-center justify-between">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-primary">
+          <span className="text-micro font-medium uppercase tracking-wider text-primary">
             Ciphertext · shift {shift}
           </span>
           <CopyButton value={cipher} />
@@ -85,7 +85,7 @@ export function CaesarDemo() {
 
       {/* Alphabet mapping */}
       <div>
-        <div className="mb-2 text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+        <div className="mb-2 text-micro font-medium uppercase tracking-wider text-ink-tertiary">
           Substitution alphabet
         </div>
         <div
@@ -100,7 +100,7 @@ export function CaesarDemo() {
               <div className="font-mono text-[11px] text-ink-tertiary">
                 {pair.plain}
               </div>
-              <div className="text-[10px] text-ink-tertiary">↓</div>
+              <div className="text-micro text-ink-tertiary">↓</div>
               <div className="font-mono text-[11.5px] font-medium text-primary">
                 {pair.cipher}
               </div>
@@ -114,7 +114,7 @@ export function CaesarDemo() {
         <button
           type="button"
           onClick={() => setBruteOpen((v) => !v)}
-          className="flex items-center gap-2 text-[12px] font-medium text-primary transition-colors hover:text-primary/80"
+          className="-mx-2 flex min-h-[32px] items-center gap-2 rounded-md px-2 text-body-sm font-medium text-primary transition-colors hover:text-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus/60"
           aria-expanded={bruteOpen}
         >
           <Chevron open={bruteOpen} />
@@ -147,7 +147,7 @@ export function CaesarDemo() {
                       </span>
                       <span className="truncate">{row.text}</span>
                       {isOriginal && (
-                        <span className="ml-auto text-[10px] uppercase tracking-wider text-primary">
+                        <span className="ml-auto text-micro uppercase tracking-wider text-primary">
                           match
                         </span>
                       )}

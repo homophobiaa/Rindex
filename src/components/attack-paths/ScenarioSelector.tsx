@@ -37,7 +37,7 @@ export function ScenarioSelector({
           <Dot />
         </span>
         <span className="flex flex-col items-start leading-tight">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+          <span className="text-micro font-medium uppercase tracking-wider text-ink-tertiary">
             Scenario
           </span>
           <span className="text-[12.5px] font-medium text-ink">{active.title}</span>

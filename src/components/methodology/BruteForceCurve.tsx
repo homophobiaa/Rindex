@@ -92,10 +92,10 @@ export function BruteForceCurve() {
       {/* Curve chart */}
       <div className="rounded-xl border border-hairline bg-surface-2/40 p-4">
         <div className="flex items-baseline justify-between">
-          <div className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+          <div className="text-micro font-medium uppercase tracking-[0.18em] text-ink-tertiary">
             Search space · log₁₀ scale
           </div>
-          <div className="font-mono text-[10px] tabular-nums text-ink-tertiary">
+          <div className="font-mono text-micro tabular-nums text-ink-tertiary">
             attacker: 10¹⁰ guesses/sec
           </div>
         </div>
@@ -140,7 +140,7 @@ export function BruteForceCurve() {
           </svg>
 
           {/* x-axis label */}
-          <div className="absolute -bottom-5 left-0 right-0 flex justify-between font-mono text-[9.5px] text-ink-tertiary">
+          <div className="absolute -bottom-5 left-0 right-0 flex justify-between font-mono text-micro text-ink-tertiary">
             <span>1</span>
             <span>length →</span>
             <span>{MAX_LEN}</span>
@@ -162,7 +162,7 @@ export function BruteForceCurve() {
             <div className="flex items-baseline justify-between">
               <div className="text-[13px] font-medium text-ink">{s.label}</div>
               <span
-                className="font-mono text-[10px] tabular-nums"
+                className="font-mono text-micro tabular-nums"
                 style={{ color: s.accent }}
               >
                 {s.charset}^{s.length}
@@ -198,7 +198,7 @@ function ChartGrid({ maxLog }: { maxLog: number }) {
         return (
           <div key={i} className="relative">
             <div className="absolute inset-x-0 h-px bg-hairline/60" />
-            <span className="absolute -top-2 left-0 font-mono text-[9px] text-ink-tertiary">
+            <span className="absolute -top-2 left-0 font-mono text-micro text-ink-tertiary">
               10^{labelLog}
             </span>
           </div>

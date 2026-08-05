@@ -42,6 +42,9 @@ export default {
         'body-sm': ['14px', { lineHeight: '1.5' }],
         caption: ['12px', { lineHeight: '1.4' }],
         eyebrow: ['13px', { lineHeight: '1.3', letterSpacing: '0.4px', fontWeight: '500' }],
+        /* Smallest label in the system — dense metric chips, graph annotations,
+           table micro-headers. Nothing should render below this. */
+        micro: ['11px', { lineHeight: '1.35' }],
       },
       borderRadius: {
         xs: '4px',

@@ -47,7 +47,7 @@ export function LiveScorePanel({ state }: { state: FactorState }) {
         />
 
         <div className="flex items-baseline justify-between">
-          <span className="text-[10px] font-medium uppercase tracking-[0.18em] text-ink-tertiary">
+          <span className="text-micro font-medium uppercase tracking-[0.18em] text-ink-tertiary">
             Live RiskIndex
           </span>
           <AnimatePresence mode="wait">
@@ -57,7 +57,7 @@ export function LiveScorePanel({ state }: { state: FactorState }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 4 }}
               transition={{ duration: 0.25 }}
-              className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+              className="rounded-full px-2 py-0.5 text-micro font-medium"
               style={{
                 color: accent,
                 background: `${accent}1a`,
@@ -107,7 +107,7 @@ export function LiveScorePanel({ state }: { state: FactorState }) {
 
         {/* Attack probability */}
         <div className="mt-4 rounded-lg border border-hairline bg-surface-2/40 px-3 py-2">
-          <div className="text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+          <div className="text-micro font-medium uppercase tracking-wider text-ink-tertiary">
             Attack-success probability
           </div>
           <div className="mt-1 flex items-baseline gap-2">
@@ -117,7 +117,7 @@ export function LiveScorePanel({ state }: { state: FactorState }) {
             >
               {Math.round(attackP * 100)}%
             </span>
-            <span className="text-[10.5px] text-ink-tertiary">
+            <span className="text-micro text-ink-tertiary">
               against your current posture
             </span>
           </div>
@@ -126,7 +126,7 @@ export function LiveScorePanel({ state }: { state: FactorState }) {
         {/* Weakest pillar highlight */}
         {weakest && (
           <div className="mt-4">
-            <div className="text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+            <div className="text-micro font-medium uppercase tracking-wider text-ink-tertiary">
               Currently weakest
             </div>
             <div className="mt-1 flex items-baseline justify-between">
@@ -151,12 +151,12 @@ export function LiveScorePanel({ state }: { state: FactorState }) {
 
         {/* All pillars condensed */}
         <div className="mt-4 space-y-1.5">
-          <div className="text-[10px] font-medium uppercase tracking-wider text-ink-tertiary">
+          <div className="text-micro font-medium uppercase tracking-wider text-ink-tertiary">
             Per-pillar
           </div>
           {breakdown.map((b) => (
             <div key={b.pillar.id} className="flex items-center gap-2">
-              <span className="min-w-0 flex-1 text-[10.5px] text-ink-muted">
+              <span className="min-w-0 flex-1 text-micro text-ink-muted">
                 {b.pillar.label}
               </span>
               <div className="h-0.5 flex-1 overflow-hidden rounded-full bg-surface-3">
@@ -167,7 +167,7 @@ export function LiveScorePanel({ state }: { state: FactorState }) {
                   transition={{ duration: 0.4 }}
                 />
               </div>
-              <span className="w-6 text-right font-mono text-[10px] tabular-nums text-ink-tertiary">
+              <span className="w-6 text-right font-mono text-micro tabular-nums text-ink-tertiary">
                 {Math.round(b.score)}
               </span>
             </div>

@@ -3,9 +3,12 @@ import type { FactorState } from '@/lib/risk';
 import { attackLikelihoods, type AttackLikelihood } from '@/lib/dashboard';
 
 /**
- * Estimated likelihood for the six attack archetypes the app models.
- * Animated horizontal bars, sorted most-likely first, each annotated with
- * the live factors currently driving it up.
+ * Relative exposure across the six attack archetypes the app models.
+ *
+ * The percentages come from hand-assigned base values and per-factor weights
+ * (see `attackLikelihoods`), NOT from incident data. They are useful for
+ * ranking your own weak spots against each other; they are not calibrated
+ * odds. See CLAIMS_AUDIT.md #9.
  */
 export function AttackLikelihoods({ state }: { state: FactorState }) {
   const items = attackLikelihoods(state);
@@ -53,14 +56,14 @@ function LikelihoodCard({ attack, index }: { attack: AttackLikelihood; index: nu
           {attack.drivers.map((d) => (
             <span
               key={d}
-              className="rounded-full border border-hairline bg-surface-2/50 px-2 py-0.5 text-[10px] text-ink-subtle"
+              className="rounded-full border border-hairline bg-surface-2/50 px-2 py-0.5 text-micro text-ink-subtle"
             >
               {d}
             </span>
           ))}
         </div>
       ) : (
-        <div className="mt-2.5 inline-flex items-center gap-1.5 text-[10.5px] text-success">
+        <div className="mt-2.5 inline-flex items-center gap-1.5 text-micro text-success">
           <span className="h-1 w-1 rounded-full bg-success" />
           No active drivers — well defended
         </div>
