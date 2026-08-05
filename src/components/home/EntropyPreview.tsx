@@ -10,7 +10,7 @@ import { useMotionTransition } from '@/lib/motion';
  *
  * Uses the SAME analyzer as the Password Lab (`analyzePassword`) so the two
  * surfaces can never disagree about the same password. Previously this
- * component carried its own simplified copy of the entropy maths, which
+ * component carried its own simplified copy of the entropy math, which
  * produced different bits, a different score and different band labels.
  */
 const EXAMPLES = [

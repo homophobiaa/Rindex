@@ -124,15 +124,16 @@ export function ScoreFlow() {
           </div>
           <p className="mt-2.5 text-caption leading-relaxed text-ink-tertiary">
             In plain terms: 0 would mean every protective habit on and no threats; 100 means the
-            reverse. The floor of {PILLAR_FLOOR} exists because being online at all is not a
-            zero-risk activity, and a score of 0 would imply otherwise.
+            reverse. The floor of {PILLAR_FLOOR} is there because a perfect 0 would be a promise
+            nobody can keep — existing online carries a little risk no questionnaire can remove.
           </p>
         </Step>
 
         <Step n={3} title="Pillars are weighted, then added" transition={transition}>
           <p className="text-body-sm text-ink-muted">
             Six pillar scores, six fixed weights, one weighted sum. That is the entire final
-            calculation — there is no second pass, no adjustment layer, no model.
+            calculation. No second pass, no adjustment layer, no mysterious tuning step where
+            the interesting decisions quietly happen.
           </p>
           <div className="mt-3 space-y-1">
             {PILLARS.map((p) => {

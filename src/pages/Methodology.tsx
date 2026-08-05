@@ -83,7 +83,7 @@ export default function Methodology() {
           <MethodSection
             index={2}
             eyebrow="Questions & pillars"
-            title="Six pillars, unequal on purpose"
+            title="Six pillars, deliberately unequal"
             description={`The bank holds ${QUESTION_FACTS.total} questions across ${QUESTION_FACTS.steps} steps, of which ${QUESTION_FACTS.conditional} only appear when an earlier answer makes them relevant — asking about backup codes after you said you have no MFA would be rude. Most people see about ${QUESTION_FACTS.typical}.`}
             flush
             footnote="Weights are considered judgement, tuned so a careful profile lands low and a careless one lands high. They are not fitted to breach data, because no such dataset was used. The bars above compare weights to each other, not to 100%."
@@ -104,8 +104,8 @@ export default function Methodology() {
           <MethodSection
             index={4}
             eyebrow="Try it"
-            title="The whole engine, exposed"
-            description={`Every switch in the model, with nothing hidden behind an average. Turn everything protective on and the composite bottoms out at ${SCORE_RANGE.best}; turn every threat on and it tops out at ${SCORE_RANGE.worst}. There is no scoring path here that the assessment does not also use.`}
+            title="Every switch, no house rules"
+            description={`Flip anything you like. Turn every protective habit on and the composite bottoms out at ${SCORE_RANGE.best} — not zero, because being online is not a zero-risk hobby. Turn every threat on and it tops out at ${SCORE_RANGE.worst}. This is the same engine the assessment runs; there is no separate demo math hiding behind it.`}
           >
             <ScoreSimulator />
           </MethodSection>
@@ -239,7 +239,7 @@ function PasswordPointer() {
         <Pointer
           to="/crypto-lab"
           title="Cryptography Lab"
-          body="Where the entropy maths comes from, plus what a real hashing and encryption round-trip looks like."
+          body="Where the entropy math comes from, plus what a real hashing and encryption round-trip looks like."
         />
       </div>
     </div>
@@ -269,7 +269,10 @@ const SOURCE_FILES = [
   { path: 'src/lib/risk/scoring.ts', what: 'Normalization, the composite, the exposure curve.' },
   { path: 'src/lib/profile/questions.ts', what: 'All questions and the skip conditions.' },
   { path: 'src/lib/dashboard/insights.ts', what: 'Recommendation ranking and projections.' },
-  { path: 'CLAIMS_AUDIT.md', what: 'A running list of our own claims we think deserve scrutiny.' },
+  {
+    path: 'CLAIMS_AUDIT.md',
+    what: 'Claims we are still refining, simplifications we made on purpose, and the places where the presentation is a little bolder than the math behind it.',
+  },
 ];
 
 function InspectIt() {

@@ -6,7 +6,7 @@ import { useMotionTransition } from '@/lib/motion';
 /**
  * Weakest-entry-point visualization.
  *
- * The maths here — `1 − ∏(1 − pᵢ)` — is the probability that AT LEAST ONE
+ * The math here — `1 − ∏(1 − pᵢ)` — is the probability that AT LEAST ONE
  * route succeeds. That describes independent alternative ways in, not a
  * sequential chain where every step must succeed (which would be `∏ pᵢ`).
  * The four routes below are therefore presented as separate doors into the

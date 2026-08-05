@@ -46,12 +46,12 @@ const LIMITS = [
   {
     title: 'Everything rests on self-reporting',
     detail:
-      'The score describes the answers given, not the person giving them. Flatter yourself and the number will flatter you back.',
+      'The score describes the answers given, not the person giving them. Flatter yourself and the number will happily flatter you back.',
   },
   {
     title: 'The weights are considered judgement, not measurement',
     detail:
-      'They were hand-tuned so a careful profile lands low and a careless one lands high. They are not derived from breach statistics, and no dataset was used to fit them.',
+      'They were hand-tuned so a careful profile lands low and a careless one lands high. No dataset was used to fit them, and we would rather say so than imply a rigour that is not there.',
   },
   {
     title: 'Six pillars is a simplification',
@@ -71,7 +71,7 @@ const LIMITS = [
   {
     title: 'This is not a security audit',
     detail:
-      'An audit involves an expert examining your actual systems. This is a questionnaire with arithmetic attached. Useful for direction, not for compliance.',
+      'An audit involves an expert examining your actual systems. This is a questionnaire with arithmetic attached. Excellent for deciding what to fix on a Sunday afternoon; not something to hand to a compliance officer.',
   },
 ];
 

@@ -10,7 +10,7 @@ import { useMotionTransition } from '@/lib/motion';
  *
  * One simulated counter (a rate, which is the only figure that makes sense
  * to tick) plus three static reference figures. Nothing here is measured
- * telemetry — the section is labelled as an illustration and the counter is
+ * telemetry — the section is labeled as an illustration and the counter is
  * explicitly marked "simulated" so it is never mistaken for live data.
  *
  * The figures are rounded, order-of-magnitude teaching values. They are

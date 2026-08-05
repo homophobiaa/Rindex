@@ -42,9 +42,9 @@ export function ModeledNumbers() {
           </code>
         </div>
         <p className="mt-1.5 text-body-sm text-ink-muted">
-          This is the entire &ldquo;attack success&rdquo; model. It is a smoothstep curve: a
-          tidy S-shape that turns your score into a percentage. It was chosen because it looks
-          right, not because anyone measured it.
+          That one line is the entire &ldquo;attack success&rdquo; model. It is a smoothstep
+          curve — a tidy S-shape that turns your score into a percentage. It was chosen because
+          the shape felt proportionate, not because anyone went out and measured it.
         </p>
 
         <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_190px]">
@@ -129,9 +129,9 @@ export function ModeledNumbers() {
         </h3>
         <p className="mt-1.5 text-body-sm leading-relaxed text-ink-muted">
           &ldquo;68%&rdquo; reads as though somebody counted something. Nobody did. Every
-          percentage on this site is a rule-based transformation of answers you typed thirty
-          seconds ago. It is reproducible, inspectable and internally consistent — and it is
-          still not a measurement of the real world.
+          percentage on this site is a rule-based transformation of answers you clicked thirty
+          seconds ago. Reproducible, inspectable, internally consistent — and still not a
+          measurement of the world outside your browser tab.
         </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           <Term

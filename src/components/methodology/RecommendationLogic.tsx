@@ -79,7 +79,7 @@ export function RecommendationLogic() {
           </div>
           <p className="mt-1.5 text-caption leading-relaxed text-ink-tertiary">
             The divisor is why a big-but-painful fix can sit below a small-but-trivial one.
-            Advice you will not follow saves zero points, so effort is priced in deliberately.
+            Advice nobody follows saves exactly zero points, so effort is priced in on purpose.
           </p>
         </div>
       </div>
