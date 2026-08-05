@@ -8,6 +8,9 @@ interface LabSectionProps {
   description: string;
   concept: string;
   weakness?: string;
+  /** Let the "why it matters" card span the full width when there is no
+   *  paired weakness card, so a lone card never sits in a half-empty row. */
+  flushFooter?: boolean;
   children: React.ReactNode;
   className?: string;
 }
@@ -26,6 +29,7 @@ export function LabSection({
   description,
   concept,
   weakness,
+  flushFooter,
   children,
   className,
 }: LabSectionProps) {
@@ -57,7 +61,12 @@ export function LabSection({
         {children}
       </div>
 
-      <footer className="mt-4 grid gap-3 sm:grid-cols-2">
+      <footer
+        className={cn(
+          'mt-4 grid gap-3',
+          weakness && !flushFooter ? 'sm:grid-cols-2' : 'grid-cols-1',
+        )}
+      >
         <ConceptCard label="Why it matters" body={concept} accent="#5e6ad2" />
         {weakness && <ConceptCard label="Weakness / lesson" body={weakness} accent="#f04438" />}
       </footer>

@@ -1,5 +1,5 @@
 /**
- * Encoding / number-system conversions for the Crypto Lab.
+ * Encoding conversions for the Cryptography Lab.
  *
  * Every function takes the original UTF-8 text and returns the string
  * representation in the requested encoding.  We surface the *bytes*, not

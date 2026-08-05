@@ -1,5 +1,5 @@
 /**
- * Hashing utilities for the Crypto Lab.
+ * Hashing utilities for the Cryptography Lab.
  *
  * Uses the browser's native Web Crypto API to compute a real SHA-256.
  * Nothing here is faked — the bytes you see are the genuine digest.
@@ -66,6 +66,26 @@ function popcount4(n: number): number {
   let c = 0;
   for (let i = 0; i < 4; i++) if ((n >> i) & 1) c++;
   return c;
+}
+
+/**
+ * Hash `salt + input`, the way a password database stores a salted digest.
+ *
+ * NOTE: plain salted SHA-256 is shown here because it is the simplest way
+ * to demonstrate what a salt *does*. It is not adequate password storage on
+ * its own — SHA-256 is built to be fast, which is exactly wrong for
+ * passwords. Real systems use bcrypt / scrypt / Argon2.
+ */
+export async function sha256Salted(salt: string, input: string): Promise<string> {
+  return sha256Hex(salt + input);
+}
+
+/** Random hex salt, from the browser CSPRNG. */
+export function randomSalt(bytes = 8): string {
+  const buf = crypto.getRandomValues(new Uint8Array(bytes));
+  let out = '';
+  for (let i = 0; i < buf.length; i++) out += buf[i].toString(16).padStart(2, '0');
+  return out;
 }
 
 /**

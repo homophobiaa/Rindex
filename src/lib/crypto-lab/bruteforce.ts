@@ -1,5 +1,5 @@
 /**
- * Brute-force math for the Crypto Lab.
+ * Brute-force math for the Cryptography Lab.
  *
  * Given a charset size, password length, and guesses-per-second budget,
  * compute the search-space size, expected crack time, and pre-built

@@ -12,7 +12,7 @@ const navLinks = [
   { to: '/assessment', label: 'Assessment' },
   { to: '/password-lab', label: 'Password Lab' },
   { to: '/risk-graph', label: 'Attack Paths' },
-  { to: '/crypto-lab', label: 'Crypto Lab' },
+  { to: '/crypto-lab', label: 'Cryptography' },
   { to: '/methodology', label: 'Methodology' },
 ];
 

@@ -7,6 +7,7 @@ import {
   growthSeries,
   humanizeSeconds,
 } from '@/lib/crypto-lab/bruteforce';
+import { useMotionTransition } from '@/lib/motion';
 
 /**
  * Brute-force mini simulator.
@@ -43,6 +44,8 @@ export function BruteForceSim() {
 
   const maxLog = series[series.length - 1].log10 || 1;
   const yourRow = series.find((r) => r.length === length);
+  // Bars snap to their final height under reduced motion instead of sweeping.
+  const barTransition = useMotionTransition({ duration: 0.4, ease: [0.16, 1, 0.3, 1] });
 
   return (
     <div className="space-y-5">
@@ -130,11 +133,42 @@ export function BruteForceSim() {
         />
         <BigMetric label="Order of magnitude" value={`10^${result.log10.toFixed(1)}`} sub="log10" />
         <BigMetric
-          label="Avg. crack time"
+          label="Modeled crack time"
           value={result.human}
           sub={`at ${humanizeRate(attacker.rate)}/sec`}
           accent
         />
+      </div>
+
+      {/* Stated assumptions — the number above is only meaningful with these */}
+      <div className="rounded-lg border border-hairline bg-surface-2/40 px-3.5 py-3">
+        <div className="text-micro font-medium uppercase tracking-wider text-ink-tertiary">
+          What this figure assumes
+        </div>
+        <ul className="mt-1.5 grid gap-1 text-[12.5px] leading-relaxed text-ink-muted sm:grid-cols-2">
+          <li>• The password is chosen uniformly at random from the character set.</li>
+          <li>• The attacker knows the length and character set already.</li>
+          <li>• A steady {humanizeRate(attacker.rate)} guesses/second, sustained.</li>
+          <li>• Average case — half the search space, not the full sweep.</li>
+        </ul>
+        <p className="mt-2 text-caption leading-relaxed text-ink-tertiary">
+          These are modeled estimates, not predictions. Change any assumption and the answer
+          moves by orders of magnitude.
+        </p>
+      </div>
+
+      {/* The honest caveat */}
+      <div className="rounded-lg border border-danger/30 bg-danger/[0.07] px-3.5 py-3">
+        <div className="text-micro font-medium uppercase tracking-wider text-danger">
+          Real attacks do not start here
+        </div>
+        <p className="mt-1 text-[12.5px] leading-relaxed text-ink-muted">
+          Nobody enumerates the keyspace from <span className="font-mono">aaaa</span>. Attackers
+          begin with passwords already leaked in previous breaches, then dictionary words, then
+          predictable mutations — <span className="font-mono">Summer2024!</span> falls in
+          seconds despite scoring well above. Brute force is the ceiling on how long a{' '}
+          <em>random</em> password lasts; it says nothing about a memorable one.
+        </p>
       </div>
 
       {/* Growth chart */}
@@ -175,7 +209,7 @@ export function BruteForceSim() {
                   }}
                   initial={false}
                   animate={{ height: `${Math.max(2, heightPct)}%` }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  transition={barTransition}
                 />
                 <span
                   className={
@@ -186,8 +220,9 @@ export function BruteForceSim() {
                 >
                   {row.length}
                 </span>
-                {/* Tooltip on hover */}
-                <div className="pointer-events-none absolute bottom-full mb-1 hidden whitespace-nowrap rounded border border-hairline bg-surface-1/95 px-2 py-1 text-micro text-ink-muted shadow-lg group-hover:block">
+                {/* Hover detail. The same figures are always available in the
+                    readout above, so nothing is hidden from touch users. */}
+                <div className="pointer-events-none absolute bottom-full z-10 mb-1 hidden whitespace-nowrap rounded border border-hairline bg-surface-1/95 px-2 py-1 text-micro text-ink-muted shadow-lg group-hover:block">
                   10^{row.log10.toFixed(1)} · {humanizeSeconds(row.seconds)}
                 </div>
               </div>

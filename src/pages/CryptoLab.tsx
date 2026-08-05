@@ -1,25 +1,29 @@
 import { motion } from 'framer-motion';
 import { LabSection } from '@/components/crypto-lab/LabSection';
-import { HashingDemo } from '@/components/crypto-lab/HashingDemo';
-import { CaesarDemo } from '@/components/crypto-lab/CaesarDemo';
-import { EncodingConverter } from '@/components/crypto-lab/EncodingConverter';
+import { TransformLab } from '@/components/crypto-lab/TransformLab';
+import { PasswordHashingDemo } from '@/components/crypto-lab/PasswordHashingDemo';
+import { EncryptionDemo } from '@/components/crypto-lab/EncryptionDemo';
 import { BruteForceSim } from '@/components/crypto-lab/BruteForceSim';
+import { CaesarDemo } from '@/components/crypto-lab/CaesarDemo';
+import { RealWorldMap } from '@/components/crypto-lab/RealWorldMap';
+import { useMotionTransition } from '@/lib/motion';
 
 /**
- * Crypto Lab — third major RIndex module.
+ * Cryptography Lab.
  *
- * Four interactive sections demonstrate cryptography, number systems, and
- * discrete-math concepts that quietly power the rest of the platform:
+ * Interactive demonstrations of the primitives that protect everyday
+ * accounts: what encoding/encryption/hashing actually differ on, how
+ * password storage works, real AES-GCM round-trips, brute-force scale,
+ * and where each piece shows up in practice.
  *
- *   1. Real SHA-256 hashing + avalanche visualizer
- *   2. Caesar cipher with live substitution + 26-shift brute force
- *   3. Number-system converter (binary / hex / decimal / base64)
- *   4. Brute-force time estimator with exponential-growth chart
+ * Route stays `/crypto-lab` for link compatibility.
  *
- * Privacy: every calculation runs locally in the browser. No input ever
- * leaves the device.
+ * Everything runs on real browser APIs (Web Crypto) except where a panel
+ * explicitly labels itself as illustrative.
  */
 export default function CryptoLab() {
+  const heroTransition = useMotionTransition({ duration: 0.55, ease: [0.16, 1, 0.3, 1] });
+
   return (
     <main className="relative pt-28 pb-section">
       {/* Ambient background — same language as the rest of RIndex */}
@@ -33,24 +37,24 @@ export default function CryptoLab() {
         <motion.header
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+          transition={heroTransition}
           className="mx-auto max-w-3xl text-center"
         >
-          <span className="eyebrow">Crypto Lab</span>
+          <span className="eyebrow">Cryptography Lab</span>
           <h1 className="mt-2 text-display-md text-gradient">
-            See the math behind security
+            The machinery behind a locked account
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-body text-ink-subtle">
-            An interactive playground for the cryptography, number systems,
-            and discrete math that quietly power RIndex. Every byte is
-            computed locally in your browser — nothing is transmitted.
+            Cryptography is what keeps your passwords unreadable after a breach, your messages
+            private in transit, and your phone useless to whoever finds it. Below are simplified,
+            interactive demonstrations of each piece — running on real browser crypto, on your
+            device, with nothing sent anywhere.
           </p>
 
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-            <Pill>Cryptography</Pill>
-            <Pill>Number systems</Pill>
-            <Pill>Discrete math</Pill>
-            <Pill>Brute-force theory</Pill>
+            <Pill tone="success">Real Web Crypto</Pill>
+            <Pill>Runs in this page</Pill>
+            <Pill tone="warning">Educational — not a security tool</Pill>
           </div>
         </motion.header>
 
@@ -58,46 +62,67 @@ export default function CryptoLab() {
         <div className="mx-auto mt-16 flex max-w-5xl flex-col gap-20">
           <LabSection
             index={1}
-            eyebrow="Hashing"
-            title="One-way functions & the avalanche effect"
-            description="A cryptographic hash maps any input to a fixed-size fingerprint. Changing one tiny thing scrambles roughly half of every output bit — that's how password databases stay safe even after they leak."
-            concept="Hashes are deterministic but irreversible: easy to compute, infeasible to invert. Real-world uses include password storage (bcrypt, argon2), file integrity, blockchain, and digital signatures."
-            weakness="Same input always produces the same hash. Attackers exploit this with rainbow tables and dictionary attacks — which is why real systems also salt and stretch their hashes."
+            eyebrow="Foundations"
+            title="Encoding, encryption and hashing are not the same thing"
+            description="Three transformations that all turn readable text into gibberish — and are constantly confused for one another. Type once and watch all three happen side by side."
+            concept="Pick the right tool: encoding for moving bytes around, encryption for keeping something secret you will need back, hashing for verifying something without storing it."
+            weakness="Base64 fools people constantly. If you can decode it without a secret, it protects nothing — it is a formatting choice, not a lock."
           >
-            <HashingDemo />
+            <TransformLab />
           </LabSection>
 
           <LabSection
             index={2}
-            eyebrow="Caesar cipher"
-            title="Substitution cipher · the oldest crypto"
-            description="Shift every letter by a fixed amount. It's the simplest symmetric cipher ever invented — and the easiest to break. Drag the shift slider to encrypt live."
-            concept="Modern ciphers (AES, ChaCha20) generalize the same idea: invertible substitutions controlled by a secret key. Discrete math (modular arithmetic) is the underlying language."
-            weakness="Only 25 possible keys. A brute-force attack tries every shift in milliseconds — open the panel below to see all 26 decryptions and spot the plaintext by eye."
+            eyebrow="Password storage"
+            title="What a website should keep instead of your password"
+            description="A site never needs your actual password — only proof you know it. Here is what that looks like, why one changed character rewrites everything, and what a salt is for."
+            concept="When a breach leaks a properly hashed table, the passwords are not in it. Attackers have to guess each one, one at a time, against a deliberately slow function."
+            weakness="Hashing alone is not enough. Without a salt, identical passwords produce identical rows and a precomputed table cracks them all at once."
+          >
+            <PasswordHashingDemo />
+          </LabSection>
+
+          <LabSection
+            index={3}
+            eyebrow="Encryption"
+            title="Lock a message, then try to open it with the wrong key"
+            description="Real AES-256-GCM with a key derived from your passphrase. Encrypt something, then attempt to decrypt it with a key you invent — and watch what a modern cipher does when the key is wrong."
+            concept="This exact construction protects your password vault, your encrypted backups, your phone's storage, and every HTTPS connection you make."
+            weakness="Encryption moves the problem to the key. Lose it and the data is gone; leak it and the encryption never happened. Key management is the hard part."
+          >
+            <EncryptionDemo />
+          </LabSection>
+
+          <LabSection
+            index={4}
+            eyebrow="Attack scale"
+            title="How long a guessing attack actually takes"
+            description="Choose a character set, a length and an attacker, and watch the search space grow. The exponent does the work: one more character multiplies the effort, one more symbol type only widens the base."
+            concept="This is the reasoning behind every entropy figure in the Password Lab — and the reason a long passphrase beats a short jumble of symbols."
+            weakness="These are modeled estimates for a randomly chosen password. Real attacks start from leaked lists and predictable patterns, where a 'strong-looking' password can fall in seconds."
+          >
+            <BruteForceSim />
+          </LabSection>
+
+          <LabSection
+            index={5}
+            eyebrow="Historical · optional"
+            title="Why a small key is no key at all"
+            description="The Caesar shift is two thousand years old and takes one screen to break completely. It is here for contrast — to show what modern ciphers had to fix."
+            concept="Historical only. Trivially breakable, and never appropriate for protecting anything real. The lesson is about keyspace size, not about the cipher."
           >
             <CaesarDemo />
           </LabSection>
 
           <LabSection
-            index={3}
-            eyebrow="Encoding"
-            title="Number systems · how computers see text"
-            description="Text is bytes. Bytes are numbers. Numbers can be written in many bases. Switch tabs to see the same input in binary, hex, decimal, and base64."
-            concept="Every web protocol, file format, and crypto primitive moves bytes around. Reading a hex digest or a base64 token is a daily security skill — it makes invisible data visible."
-            weakness="Encoding is not encryption. Base64 looks scrambled but anyone can decode it in two clicks — never use it to hide secrets."
+            index={6}
+            eyebrow="In practice"
+            title="Where each piece shows up in your day"
+            description="Every primitive above is already running somewhere in your accounts, usually invisibly."
+            concept="Knowing which primitive protects what makes security advice concrete: why unique passwords matter after a breach, why signing out of old sessions helps, why recovery codes must be stored somewhere safe."
+            flushFooter
           >
-            <EncodingConverter />
-          </LabSection>
-
-          <LabSection
-            index={4}
-            eyebrow="Brute force"
-            title="Why a long password beats a complex one"
-            description="Pick a character set, a length, and an attacker. The simulator multiplies them out and shows what would actually happen if someone tried every combination."
-            concept="Search space grows as charset^length. The exponent dominates: adding one character multiplies the work, while adding one symbol type only widens the base. This is the foundation of every entropy estimate in the Password Lab."
-            weakness="Real attackers don't enumerate randomly — they start with leaked passwords, common patterns, and dictionary mutations. The math here is the upper bound, not the average case."
-          >
-            <BruteForceSim />
+            <RealWorldMap />
           </LabSection>
         </div>
 
@@ -110,9 +135,10 @@ export default function CryptoLab() {
           className="mx-auto mt-24 max-w-2xl text-center"
         >
           <p className="text-caption leading-relaxed text-ink-tertiary">
-            Every computation in this lab runs in this page, using the browser&rsquo;s
-            built-in Web Crypto API and plain JavaScript. What you type is never sent
-            anywhere and is never saved.
+            Hashes, ciphers and random values on this page come from the browser&rsquo;s built-in
+            Web Crypto API and run in this tab. What you type is never sent anywhere and is never
+            saved. These demos exist to explain how the primitives behave — they are not hardened
+            tools, and nothing here should be used to protect real secrets.
           </p>
         </motion.footer>
       </div>
@@ -120,10 +146,20 @@ export default function CryptoLab() {
   );
 }
 
-function Pill({ children }: { children: React.ReactNode }) {
+function Pill({
+  children,
+  tone,
+}: {
+  children: React.ReactNode;
+  tone?: 'success' | 'warning';
+}) {
+  const toneClass =
+    tone === 'success'
+      ? 'border-success/30 bg-success/10 text-success'
+      : tone === 'warning'
+        ? 'border-warning/30 bg-warning/10 text-warning'
+        : 'border-hairline bg-surface-2/60 text-ink-subtle';
   return (
-    <span className="rounded-full border border-hairline bg-surface-2/60 px-2.5 py-1 text-[11px] text-ink-subtle">
-      {children}
-    </span>
+    <span className={`rounded-full border px-2.5 py-1 text-micro ${toneClass}`}>{children}</span>
   );
 }

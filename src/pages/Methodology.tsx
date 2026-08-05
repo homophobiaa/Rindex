@@ -110,7 +110,7 @@ export default function Methodology() {
             eyebrow="Cryptography"
             title="One-way functions in 64 hex characters"
             description="Hashing converts arbitrary input into a fixed-size fingerprint. Type below and watch the full SHA-256 output recompute — every keystroke produces a completely different result, which is what keeps password databases (relatively) safe."
-            footnote="Open the Crypto Lab for the full hashing / encoding / Caesar / brute-force demonstrations."
+            footnote="Open the Cryptography Lab for the full hashing, encryption and brute-force demonstrations."
           >
             <CryptoVisual />
           </MethodSection>

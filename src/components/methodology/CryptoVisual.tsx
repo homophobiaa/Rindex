@@ -7,7 +7,7 @@ import { sha256Hex } from '@/lib/crypto-lab/hash';
  *
  * Echoes the input through real Web Crypto SHA-256 and highlights how a
  * single keystroke produces a completely different fingerprint. Not a
- * replacement for the full Crypto Lab — just a sample that hints at
+ * replacement for the full Cryptography Lab — just a sample that hints at
  * what's available there.
  */
 export function CryptoVisual() {

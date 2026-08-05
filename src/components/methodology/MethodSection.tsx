@@ -18,7 +18,7 @@ interface MethodSectionProps {
  * Methodology page section shell.
  *
  * Numbered eyebrow + title + description + content panel. Mirrors the
- * visual language of `LabSection` from the Crypto Lab so both pages
+ * visual language of `LabSection` from the Cryptography Lab so both pages
  * read as part of the same product.
  */
 export function MethodSection({
