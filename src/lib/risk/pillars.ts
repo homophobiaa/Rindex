@@ -50,7 +50,7 @@ export const PILLARS: Pillar[] = [
       'Browser-only saving',
     ],
     rationale:
-      'Credential theft drives the majority of account takeovers. Entropy and uniqueness determine how quickly a stolen hash becomes a usable password.',
+      'A reused password turns one company’s breach into a key for your other accounts. Uniqueness and length decide how far a leak spreads.',
     accent: '#5e6ad2',
   },
   {
@@ -109,7 +109,7 @@ export const PILLARS: Pillar[] = [
       'Oversharing tendency',
     ],
     rationale:
-      'Most modern breaches start with a human click. Behavioral patterns are a stronger predictor of compromise than raw technical posture.',
+      'Phishing and MFA-fatigue attacks target the person, not the software. Good habits here cover gaps that no setting can close.',
     accent: '#f04438',
   },
   {
