@@ -271,7 +271,7 @@ Safer alternatives are also provided for users uncomfortable using real credenti
 
 # Development
 
-Created by Deyan Ilkov.
+Created by Homophobiaa.
 
 Built with a heavy focus on:
 

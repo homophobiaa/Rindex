@@ -3,6 +3,7 @@ import { MotionConfig } from 'framer-motion';
 import { useReduceMotion } from '@/lib/reduce-motion';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
+import { SupportButton } from '@/components/layout/SupportButton';
 import Home from '@/pages/Home';
 import Dashboard from '@/pages/Dashboard';
 import Assessment from '@/pages/Assessment';
@@ -34,6 +35,7 @@ export default function App() {
           </Routes>
         </main>
         <Footer />
+        <SupportButton />
       </div>
     </MotionConfig>
   );

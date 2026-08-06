@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Logo } from './Logo';
 import { useOfflineReady } from '@/lib/pwa';
+import { SupportLink } from './SupportButton';
 
 const cols: { title: string; links: { label: string; to: string; external?: boolean }[] }[] = [
   {
@@ -92,8 +93,12 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-hairline">
-        <div className="container-rindex flex flex-col items-start justify-between gap-3 py-6 text-caption text-ink-tertiary md:flex-row md:items-center">
-          <span>© {new Date().getFullYear()} RIndex. Educational project.</span>
+        <div className="container-rindex flex flex-col items-start justify-between gap-x-6 gap-y-3 py-6 text-caption text-ink-tertiary md:flex-row md:items-center">
+          <span className="flex flex-wrap items-center gap-x-1.5">
+            © {new Date().getFullYear()} RIndex · Built by Homophobiaa
+            <span aria-hidden>·</span>
+            <SupportLink className="-mx-1" />
+          </span>
           <span className="font-mono">
             no telemetry · no cookies · no analytics
           </span>
