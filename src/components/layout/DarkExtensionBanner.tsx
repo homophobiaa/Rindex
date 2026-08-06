@@ -15,6 +15,24 @@ const SUCCESS_MS = 3500;
  */
 const RAISED_ROUTES = ['/risk-graph'];
 
+/**
+ * Large-display sizing steps.
+ *
+ * Everything in this banner was fixed px, so it stayed literally identical
+ * from 1440px to 3840px and read as tiny on a big monitor. Discrete steps
+ * (rather than a fluid clamp) keep laptop and mobile pixel-for-pixel as they
+ * were, and only grow once there is genuinely more room.
+ */
+const WIDTH_STEPS =
+  'min-[1920px]:max-w-[min(40rem,calc(100vw-20rem))] min-[2560px]:max-w-[min(48rem,calc(100vw-24rem))]';
+const TEXT_STEPS = 'text-caption min-[1920px]:text-body-sm min-[2560px]:text-body';
+const ICON_STEPS =
+  'h-4 w-4 min-[1920px]:h-[18px] min-[1920px]:w-[18px] min-[2560px]:h-5 min-[2560px]:w-5';
+const SHELL_PAD_STEPS =
+  'min-[1920px]:gap-3.5 min-[1920px]:px-4 min-[1920px]:py-3 min-[2560px]:gap-4 min-[2560px]:rounded-2xl min-[2560px]:px-5 min-[2560px]:py-4';
+const BUTTON_STEPS =
+  'min-[1920px]:px-4 min-[1920px]:py-2 min-[2560px]:px-5 min-[2560px]:py-2.5';
+
 type View = 'hidden' | 'warn' | 'success';
 
 function wasDismissed(): boolean {
@@ -96,21 +114,25 @@ export function DarkExtensionBanner() {
                 'pointer-events-auto flex max-w-[min(34rem,100%)] flex-col gap-2.5 rounded-xl',
                 // Reserve the Ko-fi pill's corner on md+ so the two never meet.
                 'md:max-w-[min(34rem,calc(100vw-17rem))]',
+                WIDTH_STEPS,
                 'border border-hairline bg-surface-1/95 p-3.5 shadow-lg backdrop-blur-xl',
                 'sm:flex-row sm:items-center sm:gap-3 sm:py-2.5',
+                SHELL_PAD_STEPS,
               )}
             >
-              <MoonIcon className="h-4 w-4 shrink-0 text-warning" />
-              <p className="min-w-0 flex-1 text-caption leading-snug text-ink-muted">
-                {label ?? 'A dark-mode extension'} detected. RIndex is already dark -
+              <MoonIcon className={cn('shrink-0 text-warning', ICON_STEPS)} />
+              <p className={cn('min-w-0 flex-1 leading-snug text-ink-muted', TEXT_STEPS)}>
+                {label ?? 'A dark-mode extension'} detected. RIndex is already dark —
                 double-dark makes the colors a little cursed.
               </p>
               <button
                 type="button"
                 onClick={dismiss}
                 className={cn(
-                  'shrink-0 self-start rounded-full border border-hairline bg-surface-2 px-3 py-1.5',
-                  'text-caption text-ink-subtle transition-colors',
+                  'shrink-0 self-start whitespace-nowrap rounded-full border border-hairline',
+                  'bg-surface-2 px-3 py-1.5 text-ink-subtle transition-colors',
+                  TEXT_STEPS,
+                  BUTTON_STEPS,
                   'hover:border-hairline-strong hover:text-ink',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-focus/60',
                   'focus-visible:ring-offset-2 focus-visible:ring-offset-canvas sm:self-auto',
@@ -131,11 +153,13 @@ export function DarkExtensionBanner() {
               className={cn(
                 'pointer-events-auto flex max-w-[min(34rem,100%)] items-center gap-2.5 rounded-xl',
                 'md:max-w-[min(34rem,calc(100vw-17rem))]',
+                WIDTH_STEPS,
                 'border border-success/30 bg-success/[0.08] px-3.5 py-2.5 shadow-lg backdrop-blur-xl',
+                SHELL_PAD_STEPS,
               )}
             >
-              <CheckIcon className="h-4 w-4 shrink-0 text-success" />
-              <p className="text-caption leading-snug text-ink-muted">
+              <CheckIcon className={cn('shrink-0 text-success', ICON_STEPS)} />
+              <p className={cn('leading-snug text-ink-muted', TEXT_STEPS)}>
                 Much better. One dark mode is plenty.
               </p>
             </motion.div>
