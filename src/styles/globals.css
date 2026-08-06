@@ -103,6 +103,87 @@
     @apply h-px w-full bg-hairline;
   }
 
+  /* ---------------------------------------------------------------- *
+   * Support pill — receipt unroll
+   *
+   * THE PILL NEVER MOVES. The anchor has a fixed height of pill + strip,
+   * so the space the strip will occupy is reserved even while closed.
+   * The wrapper is bottom-anchored, so a constant anchor height means a
+   * constant pill position — the cursor never has to chase it.
+   *
+   * The reveal is a genuine height expansion (`grid-template-rows:
+   * 0fr → 1fr` on an overflow-hidden row) with the strip sliding from
+   * -80% inside that row. Slot and paper move together, so it reads as a
+   * receipt feeding out from under the pill rather than a panel appearing.
+   * ---------------------------------------------------------------- */
+  .support-anchor {
+    --support-strip-h: 46px;
+    /* How far the strip's top edge hides behind the pill's rounded bottom. */
+    --support-tuck: 10px;
+    /* Reserved: pill + the strip's *contributed* height (its own height
+       minus the tucked overlap). Constant in both states, which is what
+       keeps the pill from moving. */
+    height: calc(36px + var(--support-strip-h) - var(--support-tuck));
+  }
+
+  .support-roll {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 500ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .support-roll > * {
+    min-height: 0;
+    overflow: hidden;
+  }
+  .support-note {
+    height: var(--support-strip-h);
+    margin-top: calc(-1 * var(--support-tuck));
+    transform: translateY(-80%);
+    transition: transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+    /* Top-edge shading so the strip looks like it is emerging from behind
+       the pill rather than sitting on top of the page. */
+    box-shadow: inset 0 6px 8px -6px rgba(0, 0, 0, 0.55);
+  }
+
+  /* Closing is slightly quicker than opening. */
+  .support-anchor:not(:hover):not(:focus-within) .support-roll {
+    transition-duration: 380ms;
+  }
+  .support-anchor:not(:hover):not(:focus-within) .support-note {
+    transition-duration: 380ms;
+  }
+
+  /* Hover only on real pointers so a tap does not latch it open. */
+  @media (hover: hover) {
+    .support-anchor:hover .support-roll {
+      grid-template-rows: 1fr;
+    }
+    .support-anchor:hover .support-note {
+      transform: translateY(0);
+    }
+  }
+  .support-anchor:focus-within .support-roll {
+    grid-template-rows: 1fr;
+  }
+  .support-anchor:focus-within .support-note {
+    transform: translateY(0);
+  }
+
+  /* Reduced motion: same geometry, same width, no travel — the row simply
+     is or is not there. The open-state selectors are repeated here because
+     they out-specify a bare `[data-reduce-motion] .support-note` rule. */
+  [data-reduce-motion='true'] .support-roll,
+  [data-reduce-motion='true'] .support-anchor:not(:hover):not(:focus-within) .support-roll {
+    transition: none;
+  }
+  [data-reduce-motion='true'] .support-note,
+  [data-reduce-motion='true'] .support-anchor:not(:hover):not(:focus-within) .support-note,
+  [data-reduce-motion='true'] .support-anchor:hover .support-note,
+  [data-reduce-motion='true'] .support-anchor:focus-within .support-note {
+    transform: none;
+    transition: none;
+  }
+
   .text-gradient {
     background: linear-gradient(180deg, #ffffff 0%, #c8ccd9 100%);
     -webkit-background-clip: text;
