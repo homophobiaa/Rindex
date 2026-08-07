@@ -216,15 +216,15 @@ function plainVerdict(a: AnalysisResult): string {
  */
 function plainProblem(id: string, fallback: string): string {
   const map: Record<string, string> = {
-    'common-password': 'It\u2019s on every leaked-password list',
+    'common-password': 'It’s on every leaked-password list',
     'dictionary-word': 'Built around a common dictionary word',
     'keyboard-sequence': 'Contains a keyboard pattern (e.g. qwerty, asdf)',
-    'digits-only': 'Uses only digits \u2014 too easy to brute force',
-    'letters-only': 'Uses only letters \u2014 no numbers or symbols',
+    'digits-only': 'Uses only digits — too easy to brute force',
+    'letters-only': 'Uses only letters — no numbers or symbols',
     'repeated-char': 'Long runs of the same character',
     'trailing-year': 'Ends in a year like 2024 or 2025',
     'trailing-digits': 'Just digits tacked onto the end',
-    'leet-speak': 'Predictable letter\u2192number swaps (p@ssw0rd)',
+    'leet-speak': 'Predictable letter→number swaps (p@ssw0rd)',
     sequential: 'Contains a sequence like abc or 1234',
     'low-diversity': 'Reuses the same few characters',
     'capitalized-word-suffix': 'Classic Word + numbers pattern',

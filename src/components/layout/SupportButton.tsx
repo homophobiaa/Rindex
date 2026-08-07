@@ -7,9 +7,10 @@ export const SUPPORT_HINT = 'Useful? You can buy me a coffee.';
 
 /**
  * Routes where a bottom-corner pill would sit on top of something that
- * matters. The attack-path canvas fills the viewport and already owns all
- * four corners (details drawer, risk breakdown, transport controls, legend),
- * so the floating shortcut is suppressed there — the footer link remains.
+ * matters. The attack-path visualizer fills the viewport and its own
+ * control rail occupies the bottom edge, so the floating shortcut is
+ * suppressed there. That route also has no footer, so the Ko-fi link is
+ * simply absent from it — deliberate: a live tool is not a donation prompt.
  */
 const SUPPRESSED_ROUTES = ['/risk-graph'];
 

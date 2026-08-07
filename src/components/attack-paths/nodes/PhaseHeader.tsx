@@ -20,11 +20,13 @@ function PhaseHeaderImpl({ data }: NodeProps<PhaseHeaderData>) {
       className="pointer-events-none select-none"
       style={{ width: data.width - 24 }}
     >
+      {/* Sized up from the type scale: these render inside the zoomed
+          viewport, where nominal 11/12px lands near 9px. */}
       <div className="flex items-center gap-2">
-        <span className="font-mono text-micro tabular-nums text-ink-tertiary">
+        <span className="font-mono text-[14px] tabular-nums text-ink-tertiary">
           {String(data.index + 1).padStart(2, '0')}
         </span>
-        <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-ink-subtle">
+        <span className="text-[14px] font-medium uppercase tracking-[0.14em] text-ink-subtle">
           {data.label}
         </span>
         <span className="h-px flex-1 bg-gradient-to-r from-hairline via-hairline/40 to-transparent" />

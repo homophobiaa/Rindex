@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import ReactFlow, {
   Background,
   BackgroundVariant,
-  Controls,
   type Edge,
   type Node,
   type OnSelectionChangeFunc,
@@ -23,48 +22,87 @@ import type { SimulationState } from '@/lib/attack-paths/simulation';
 import { AttackNode } from './nodes/AttackNode';
 import { AttackEdge } from './AttackEdge';
 import { PhaseHeader, type PhaseHeaderData } from './nodes/PhaseHeader';
+import { CanvasUtilities } from './CanvasUtilities';
 
 const nodeTypes = { attack: AttackNode, phase: PhaseHeader };
 const edgeTypes = { attack: AttackEdge };
+
+/** Authored node box, in graph units. Matches `AttackNode`'s own size. */
+const NODE_W = 240;
+const NODE_H = 116;
+/**
+ * Gap between a stage label and the top row of nodes. Measured from the
+ * scenario's own topmost node rather than from the origin: scenarios start
+ * on different rows, and a fixed offset left a 200px band of dead canvas
+ * above the graph on the ones that start low.
+ */
+const HEADER_GAP = 46;
+const HEADER_H = 20;
+
+/**
+ * Framing bounds. Below `MIN_ZOOM` node titles stop being readable at 100%
+ * browser zoom, so the graph is cropped instead of shrunk — this is a
+ * pannable canvas, and a legible partial view beats an illegible whole one.
+ * `MAX_ZOOM` stops a large monitor from simply inflating everything.
+ */
+const MIN_ZOOM = 0.8;
+const MAX_ZOOM = 1.25;
+
+export interface GraphActions {
+  /** Re-frame the current scenario (animated). */
+  reframe: () => void;
+  /** Drop node selection inside React Flow, which owns it. */
+  clearSelection: () => void;
+}
 
 interface AttackGraphProps {
   scenario: Scenario;
   simulation: SimulationState;
   selectedNodeId: string | null;
   onSelectNode: (id: string | null) => void;
+  onRegisterActions: (actions: GraphActions) => void;
+}
+
+interface Rect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 /**
- * Full-bleed React Flow canvas.  Fills its parent container — the parent
- * controls the height so the page can give it the entire viewport.
- *
- * Owns three visual surfaces:
- *   - phase-lane backdrop (SVG behind the React Flow viewport)
- *   - phase-header nodes (live inside the canvas, pan with it)
- *   - attack nodes + edges (the actual graph)
+ * Full-bleed React Flow canvas. Fills its parent, which owns the height —
+ * the visualizer gives it everything between the header and the rail.
  */
 export function AttackGraph({
   scenario,
   simulation,
   selectedNodeId,
   onSelectNode,
+  onRegisterActions,
 }: AttackGraphProps) {
   const flow = useReactFlow();
-  const lastScenarioId = useRef(scenario.id);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const firstScenario = useRef(true);
 
-  // Phase-header nodes — one per lane, sitting above the top row.
+  const headerY = useMemo(
+    () => Math.min(...scenario.nodes.map((n) => n.position.y)) - HEADER_GAP,
+    [scenario],
+  );
+
+  // Phase-header nodes — one per lane, sitting just above the top row.
   const headerNodes = useMemo<Node<PhaseHeaderData>[]>(
     () =>
       scenario.phases.map((p, i) => ({
         id: `phase-${p.id}`,
         type: 'phase',
-        position: { x: p.x + 24, y: -90 },
+        position: { x: p.x + 24, y: headerY },
         data: { label: p.label, index: i, total: scenario.phases.length, width: p.width },
         draggable: false,
         selectable: false,
         focusable: false,
       })),
-    [scenario],
+    [scenario, headerY],
   );
 
   const initialNodes = useMemo<Node[]>(
@@ -78,26 +116,124 @@ export function AttackGraph({
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<AttackEdgeData>(initialEdges);
-  const fitDuration = useMotionDuration(0.6, 'ms');
+  const frameDuration = useMotionDuration(0.5, 'ms');
 
-  // Replace nodes/edges whenever the scenario changes, and re-fit.
+  /* ---------------------------------------------------------------- *
+   * Framing
+   *
+   * Bounds come from the authored `position` values rather than React
+   * Flow's bounds helpers: those read `positionAbsolute`, which is
+   * undefined until the nodes have been measured, and the first frame has
+   * to be right before anything is painted.
+   * ---------------------------------------------------------------- */
+  const bounds = useMemo(() => {
+    const pathIds = new Set(scenario.path);
+    const boxes = scenario.nodes.map((n) => ({
+      x: n.position.x,
+      y: n.position.y,
+      w: NODE_W,
+      h: NODE_H,
+      onPath: pathIds.has(n.id),
+    }));
+    const labelBand = scenario.phases.map((p) => ({
+      x: p.x + 24,
+      y: headerY,
+      w: p.width,
+      h: HEADER_H,
+      onPath: false,
+    }));
+
+    return { full: rectOf([...boxes, ...labelBand]), boxes, labelBand };
+  }, [scenario, headerY]);
+
+  const frame = useCallback(
+    (duration: number) => {
+      const el = wrapRef.current;
+      if (!el) return;
+      const { width, height } = el.getBoundingClientRect();
+      if (!width || !height) return;
+
+      const { full, boxes, labelBand } = bounds;
+      const padX = 28;
+      const padY = 28;
+      const zoom = clamp(
+        Math.min((width - padX * 2) / full.width, (height - padY * 2) / full.height),
+        MIN_ZOOM,
+        MAX_ZOOM,
+      );
+
+      // Horizontal: centre when it all fits. When the readability floor
+      // forces a crop, anchor at the entry point instead — the attack reads
+      // left to right, so the first step is what must be on screen.
+      const croppedX = full.width * zoom > width - 2;
+      const x = croppedX
+        ? padX - full.x * zoom
+        : width / 2 - (full.x + full.width / 2) * zoom;
+
+      // Vertical framing follows what that horizontal anchor actually puts
+      // on screen. On a cropped canvas only a left-hand slice is visible,
+      // and rows belonging to columns far off to the right must not drag
+      // the framing — that is what leaves a band of dead canvas.
+      const visRight = full.x + (width - padX) / zoom;
+      const onScreen = croppedX ? boxes.filter((b) => b.x < visRight) : boxes;
+      const slice = onScreen.length ? onScreen : boxes;
+      const vRect = rectOf([...slice, ...labelBand.filter((b) => b.x < visRight)]);
+
+      // Still too tall? Fall back to the canonical path through that slice,
+      // so the storyline sits on the midline and the branches bleed.
+      const croppedY = vRect.height * zoom > height - 2;
+      const pathSlice = slice.filter((b) => b.onPath);
+      const focus = croppedY && pathSlice.length ? rectOf(pathSlice) : vRect;
+
+      let y = height / 2 - (focus.y + focus.height / 2) * zoom;
+      if (croppedY) {
+        const top = padY - vRect.y * zoom;
+        const bottom = height - padY - (vRect.y + vRect.height) * zoom;
+        y = Math.min(top, Math.max(bottom, y));
+      }
+
+      flow.setViewport({ x, y, zoom }, duration ? { duration } : undefined);
+    },
+    [flow, bounds],
+  );
+
+  // Swap graph + re-frame on every scenario change. The very first frame is
+  // instant; later ones animate so the change reads as a transition.
   useEffect(() => {
     setNodes([...headerNodes, ...scenario.nodes.map((n) => ({ ...n }))]);
     setEdges(scenario.edges.map((e) => ({ ...e })));
-    const wasFirst = lastScenarioId.current === scenario.id;
-    lastScenarioId.current = scenario.id;
-    const t = window.setTimeout(
-      () =>
-        flow.fitView({
-          padding: 0.22,
-          duration: wasFirst ? 0 : fitDuration,
-          maxZoom: 1.05,
-          minZoom: 0.5,
-        }),
-      80,
-    );
+    const instant = firstScenario.current;
+    firstScenario.current = false;
+    const t = window.setTimeout(() => frame(instant ? 0 : frameDuration), 60);
     return () => window.clearTimeout(t);
-  }, [scenario, headerNodes, setNodes, setEdges, flow, fitDuration]);
+  }, [scenario, headerNodes, setNodes, setEdges, frame, frameDuration]);
+
+  // Re-frame when the canvas itself changes size (window resize, drawer
+  // open on a narrow window, orientation change).
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    let raf = 0;
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => frame(0));
+    });
+    ro.observe(el);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [frame]);
+
+  /** Deselect through React Flow, which owns selection state. */
+  const clearSelection = useCallback(() => {
+    setNodes((prev) => prev.map((n) => (n.selected ? { ...n, selected: false } : n)));
+    onSelectNode(null);
+  }, [setNodes, onSelectNode]);
+
+  useEffect(() => {
+    onRegisterActions({ reframe: () => frame(frameDuration), clearSelection });
+  }, [onRegisterActions, frame, frameDuration, clearSelection]);
 
   // Project simulation state onto live nodes.
   useEffect(() => {
@@ -129,7 +265,7 @@ export function AttackGraph({
     );
   }, [simulation.activeEdges, setEdges]);
 
-  // Sync external selection.
+  // Sync external selection back onto the nodes.
   useEffect(() => {
     setNodes((prev) =>
       prev.map((n) =>
@@ -146,7 +282,7 @@ export function AttackGraph({
   };
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div ref={wrapRef} className="relative h-full w-full overflow-hidden">
       {/* Reusable arrow markers used by AttackEdge. */}
       <svg style={{ height: 0, width: 0, position: 'absolute' }}>
         <defs>
@@ -168,8 +304,7 @@ export function AttackGraph({
         onEdgesChange={onEdgesChange}
         onSelectionChange={handleSelectionChange}
         onPaneClick={() => onSelectNode(null)}
-        fitView
-        fitViewOptions={{ padding: 0.22, maxZoom: 1.05, minZoom: 0.5 }}
+        onInit={() => frame(0)}
         nodesDraggable
         nodesConnectable={false}
         elementsSelectable
@@ -179,30 +314,32 @@ export function AttackGraph({
         panOnScroll={false}
         preventScrolling
         proOptions={{ hideAttribution: true }}
-        minZoom={0.35}
-        maxZoom={1.6}
+        minZoom={0.3}
+        maxZoom={1.8}
         defaultEdgeOptions={{ type: 'attack' }}
       >
         <PhaseLanesBackdrop phases={scenario.phases} />
-        <Background variant={BackgroundVariant.Dots} gap={26} size={1} color="#1a1b20" />
-        <Controls
-          position="bottom-right"
-          showInteractive={false}
-          className="!flex !flex-col !gap-1 !rounded-md !border !border-hairline !bg-surface-2/85 !p-1 !shadow-none [&_button]:!h-7 [&_button]:!w-7 [&_button]:!rounded-sm [&_button]:!border-0 [&_button]:!bg-transparent [&_button]:!text-ink-subtle [&_button:hover]:!bg-surface-3 [&_button:hover]:!text-ink"
-        />
+        <Background variant={BackgroundVariant.Dots} gap={26} size={1} color="#212227" />
       </ReactFlow>
 
-      {/* Edge vignette — keeps the bright canvas from competing with the navbar */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'radial-gradient(ellipse 90% 70% at 50% 50%, transparent 55%, rgba(1,1,2,0.55) 100%)',
-        }}
-      />
+      <CanvasUtilities onReframe={() => frame(frameDuration)} />
     </div>
   );
+}
+
+/* ------------------------------------------------------------------ */
+
+function rectOf(boxes: { x: number; y: number; w: number; h: number }[]): Rect {
+  if (boxes.length === 0) return { x: 0, y: 0, width: 1, height: 1 };
+  const minX = Math.min(...boxes.map((b) => b.x));
+  const minY = Math.min(...boxes.map((b) => b.y));
+  const maxX = Math.max(...boxes.map((b) => b.x + b.w));
+  const maxY = Math.max(...boxes.map((b) => b.y + b.h));
+  return { x: minX, y: minY, width: Math.max(1, maxX - minX), height: Math.max(1, maxY - minY) };
+}
+
+function clamp(v: number, lo: number, hi: number) {
+  return Math.min(hi, Math.max(lo, v));
 }
 
 function ArrowMarker({
@@ -230,18 +367,11 @@ function ArrowMarker({
 }
 
 /**
- * Faint vertical bands behind the lanes.  Lives as a React Flow Panel-like
- * absolute layer behind the dots background — but rendered as an SVG that
- * pans/zooms with the viewport so it stays aligned with the nodes.
+ * Faint vertical bands behind the lanes — enough tonal separation that the
+ * canvas reads as a work surface rather than flat black.
  */
 function PhaseLanesBackdrop({ phases }: { phases: ScenarioPhase[] }) {
-  // We can't reach the viewport transform from here without useStore, so we
-  // render bands as plain SVG inside React Flow's portal layer.  The bands
-  // are wide enough that the small misalignment under zoom is invisible.
-  const totalWidth = phases.reduce(
-    (acc, p) => Math.max(acc, p.x + p.width),
-    0,
-  );
+  const totalWidth = phases.reduce((acc, p) => Math.max(acc, p.x + p.width), 0);
   return (
     <svg
       className="absolute inset-0 h-full w-full"

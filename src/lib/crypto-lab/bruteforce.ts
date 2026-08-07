@@ -123,7 +123,7 @@ export function bruteForce({
     log10,
     secondsAvg: seconds,
     human: humanizeSeconds(seconds),
-    scientific: `\u224810^${log10.toFixed(1)}`,
+    scientific: `≈10^${log10.toFixed(1)}`,
   };
 }
 
@@ -149,7 +149,7 @@ export function humanizeSeconds(s: number): string {
   if (s < MEGA_YEAR) return `${(s / KILO_YEAR).toFixed(1)}k years`;
   if (s < BILLION_YEAR) return `${(s / MEGA_YEAR).toFixed(1)}M years`;
   if (s < AGE_OF_UNIVERSE) return `${(s / BILLION_YEAR).toFixed(1)}B years`;
-  return `${(s / AGE_OF_UNIVERSE).toFixed(1)}\u00d7 age of the universe`;
+  return `${(s / AGE_OF_UNIVERSE).toFixed(1)}× age of the universe`;
 }
 
 /**

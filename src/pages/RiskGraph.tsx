@@ -1,176 +1,148 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ReactFlowProvider } from 'reactflow';
-import { motion } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 
-import { AttackGraph } from '@/components/attack-paths/AttackGraph';
-import { ScenarioSelector } from '@/components/attack-paths/ScenarioSelector';
-import { SimulationControls } from '@/components/attack-paths/SimulationControls';
-import { DetailsPanel } from '@/components/attack-paths/DetailsPanel';
-import { RiskBreakdown } from '@/components/attack-paths/RiskBreakdown';
-import {
-  SCENARIOS,
-  getScenario,
-} from '@/lib/attack-paths/scenarios';
-import {
-  useAttackSimulation,
-  useCurrentStep,
-} from '@/lib/attack-paths/simulation';
-
-const EASE = [0.16, 1, 0.3, 1] as const;
+import { AttackGraph, type GraphActions } from '@/components/attack-paths/AttackGraph';
+import { VisualizerHeader } from '@/components/attack-paths/VisualizerHeader';
+import { ScenarioBrowser } from '@/components/attack-paths/ScenarioBrowser';
+import { ControlRail } from '@/components/attack-paths/ControlRail';
+import { NodeInspector } from '@/components/attack-paths/NodeInspector';
+import { SCENARIOS, getScenario } from '@/lib/attack-paths/scenarios';
+import { useAttackSimulation, useCurrentStep } from '@/lib/attack-paths/simulation';
+import { useMotionTransition } from '@/lib/motion';
+import { cn } from '@/lib/cn';
 
 /**
  * Attack Path Visualizer.
  *
- * Full-viewport canvas workspace.  The graph is the product — every
- * supporting surface is a floating, collapsible overlay so it never
- * suffocates the visualization.
+ * A tool route, not a page: navbar → visualizer header → canvas → control
+ * rail, filling the viewport with no site container and no footer. Every
+ * supporting surface is attached to an edge of the tool, and the canvas
+ * gets everything that is left.
  */
 export default function RiskGraph() {
-  const [scenarioId, setScenarioId] = useState<string>(SCENARIOS[0].id);
+  // Scenario lives in the query string so a specific attack path can be
+  // linked directly, and browser back/forward steps through them.
+  const [params, setParams] = useSearchParams();
+  const requested = params.get('scenario');
+  const scenarioId = SCENARIOS.some((s) => s.id === requested)
+    ? (requested as string)
+    : SCENARIOS[0].id;
+
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [browserOpen, setBrowserOpen] = useState(false);
+  const actionsRef = useRef<GraphActions | null>(null);
 
   const scenario = getScenario(scenarioId);
+  const index = Math.max(0, SCENARIOS.findIndex((s) => s.id === scenarioId));
   const { state: simulation, play, pause, reset, stepOnce, setSpeed } =
     useAttackSimulation(scenario);
   const currentStep = useCurrentStep(scenario, simulation);
+  const hintTransition = useMotionTransition({ duration: 0.3, ease: [0.16, 1, 0.3, 1] });
 
-  // Drop stale selection when the scenario changes.
+  const selectScenario = useCallback(
+    (id: string) => {
+      setParams(id === SCENARIOS[0].id ? {} : { scenario: id });
+    },
+    [setParams],
+  );
+
+  const stepScenario = useCallback(
+    (delta: number) => {
+      const next = (index + delta + SCENARIOS.length) % SCENARIOS.length;
+      selectScenario(SCENARIOS[next].id);
+    },
+    [index, selectScenario],
+  );
+
+  // A node id from the previous graph would keep the inspector open on
+  // nothing, so selection is dropped whenever the scenario changes.
   useEffect(() => {
     setSelectedNodeId(null);
   }, [scenarioId]);
 
+  const registerActions = useCallback((a: GraphActions) => {
+    actionsRef.current = a;
+  }, []);
+
+  // Closing goes through the graph: React Flow owns selection internally, so
+  // clearing only our copy would be undone by its next selection event.
+  const closeInspector = useCallback(() => {
+    if (actionsRef.current) actionsRef.current.clearSelection();
+    else setSelectedNodeId(null);
+  }, []);
+
   return (
-    <main className="relative w-full bg-canvas lg:h-[calc(100vh-72px)] lg:overflow-hidden">
-      {/* Subtle ambient gradient — keeps the canvas from feeling sterile */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-radial-fade opacity-60"
+    <div
+      className={cn(
+        'relative flex flex-col overflow-hidden bg-canvas',
+        // The tool owns the viewport under the 72px navbar. `min-h` keeps it
+        // usable on very short windows, where the document may scroll a little.
+        'h-[calc(100dvh-72px)] min-h-[540px]',
+      )}
+    >
+      <VisualizerHeader
+        scenarios={SCENARIOS}
+        active={scenario}
+        index={index}
+        onStep={stepScenario}
+        onBrowse={() => setBrowserOpen(true)}
+        browserOpen={browserOpen}
       />
 
-      {/* Wide: graph left, collapsible drawer right.
-          Narrow: graph on top with the details stacked underneath, so the
-          canvas is never squeezed into an unusable sliver. */}
-      <div className="relative flex w-full flex-col lg:h-full lg:flex-row">
-        <section className="relative h-[62vh] min-w-0 flex-1 lg:h-full">
-          <ReactFlowProvider>
-            <AttackGraph
-              scenario={scenario}
-              simulation={simulation}
-              selectedNodeId={selectedNodeId}
-              onSelectNode={setSelectedNodeId}
-            />
-          </ReactFlowProvider>
-
-          {/* Top-left overlay — scenario picker + header */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: EASE }}
-            className="pointer-events-none absolute left-4 top-4 z-10 flex max-w-[calc(100%-2rem)] flex-col gap-2"
-          >
-            <div className="pointer-events-auto">
-              <ScenarioSelector
-                scenarios={SCENARIOS}
-                activeId={scenarioId}
-                onSelect={setScenarioId}
-              />
-            </div>
-            <div className="pointer-events-none ml-1 max-w-[420px]">
-              <h1 className="text-caption font-medium uppercase tracking-[0.18em] text-ink-tertiary">
-                Attack path visualizer
-              </h1>
-              <p className="mt-0.5 text-body-sm leading-snug text-ink-subtle">
-                {scenario.tagline}
-              </p>
-            </div>
-          </motion.div>
-
-          {/* Bottom-left overlay — risk breakdown */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: EASE, delay: 0.05 }}
-            className="pointer-events-auto absolute bottom-4 left-4 z-10 hidden lg:block"
-          >
-            <RiskBreakdown scenario={scenario} />
-          </motion.div>
-
-          {/* Bottom-center overlay — simulation cockpit */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: EASE, delay: 0.1 }}
-            className="pointer-events-none absolute inset-x-0 bottom-4 z-10 flex justify-center px-4"
-          >
-            <SimulationControls
-              state={simulation}
-              step={currentStep}
-              onPlay={play}
-              onPause={pause}
-              onStep={stepOnce}
-              onReset={reset}
-              onSetSpeed={setSpeed}
-            />
-          </motion.div>
-
-          {/* Legend pill — top right of canvas area */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: EASE, delay: 0.05 }}
-            className="pointer-events-auto absolute right-4 top-4 z-10 hidden lg:block"
-          >
-            <Legend />
-          </motion.div>
-        </section>
-
-        {/* Wide: right drawer. Narrow: stacked block under the graph. */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.45, ease: EASE }}
-          className="relative z-20 lg:h-full"
-        >
-          <DetailsPanel
+      {/* ── Canvas region — everything left over ─────────────────── */}
+      <div className="relative min-h-0 flex-1">
+        <ReactFlowProvider>
+          <AttackGraph
             scenario={scenario}
+            simulation={simulation}
             selectedNodeId={selectedNodeId}
-            currentStep={currentStep}
+            onSelectNode={setSelectedNodeId}
+            onRegisterActions={registerActions}
           />
+        </ReactFlowProvider>
 
-          {/* The overlays are hidden on narrow screens because they would
-              cover the canvas — the same content is shown here instead. */}
-          <div className="flex flex-col gap-4 border-t border-hairline p-4 lg:hidden">
-            <RiskBreakdown scenario={scenario} />
-            <Legend />
-          </div>
-        </motion.div>
+        {/* Low-key nudge, not a widget. Steps aside once it is obeyed. */}
+        <AnimatePresence>
+          {!selectedNodeId && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={hintTransition}
+              className="pointer-events-none absolute right-4 top-3 z-10 hidden text-caption text-ink-tertiary sm:block"
+            >
+              Click any node — the red ones come with context.
+            </motion.p>
+          )}
+        </AnimatePresence>
+
+        <NodeInspector
+          scenario={scenario}
+          selectedNodeId={selectedNodeId}
+          onClose={closeInspector}
+        />
       </div>
-    </main>
-  );
-}
 
-/* ------------------------------------------------------------------ */
+      <ControlRail
+        scenario={scenario}
+        state={simulation}
+        step={currentStep}
+        onPlay={play}
+        onPause={pause}
+        onStep={stepOnce}
+        onReset={reset}
+        onSetSpeed={setSpeed}
+      />
 
-function Legend() {
-  const items: { color: string; label: string }[] = [
-    { color: '#f04438', label: 'Active path' },
-    { color: '#2c2e34', label: 'Possible step' },
-    { color: '#27a644', label: 'Barrier (blocked)' },
-    { color: '#d8341c', label: 'Impact' },
-    { color: '#5e6ad2', label: 'Recovery' },
-  ];
-  return (
-    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-lg border border-hairline bg-surface-1/85 px-3 py-2 backdrop-blur-xl">
-      {items.map((it) => (
-        <div key={it.label} className="flex items-center gap-1.5">
-          <span
-            className="inline-block h-[3px] w-5 shrink-0 rounded-full"
-            style={{ background: it.color }}
-            aria-hidden
-          />
-          <span className="text-micro text-ink-tertiary">{it.label}</span>
-        </div>
-      ))}
+      <ScenarioBrowser
+        scenarios={SCENARIOS}
+        activeId={scenarioId}
+        open={browserOpen}
+        onSelect={selectScenario}
+        onClose={() => setBrowserOpen(false)}
+      />
     </div>
   );
 }

@@ -69,8 +69,8 @@ function AttackNodeImpl({ data, selected }: NodeProps<AttackNodeData>) {
 
       <div className="relative px-3.5 py-3">
         {/* Header row: kind chip + severity */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-2">
+        <div className="flex items-center justify-between gap-2.5">
+          <div className="flex min-w-0 items-center gap-1.5">
             <span
               className="grid h-6 w-6 shrink-0 place-items-center rounded-md"
               style={{ background: `${meta.color}22`, color: meta.color }}
@@ -78,7 +78,7 @@ function AttackNodeImpl({ data, selected }: NodeProps<AttackNodeData>) {
               <Icon className="h-3.5 w-3.5" />
             </span>
             <span
-              className="text-micro font-medium uppercase tracking-wider"
+              className="text-[13px] font-medium uppercase tracking-wider"
               style={{ color: meta.color }}
             >
               {meta.badge}
@@ -86,7 +86,7 @@ function AttackNodeImpl({ data, selected }: NodeProps<AttackNodeData>) {
           </div>
           {data.severity && (
             <span
-              className="rounded px-1.5 py-0.5 text-micro font-semibold uppercase tracking-wider"
+              className="rounded px-1.5 py-0.5 text-[12.5px] font-semibold uppercase tracking-wider"
               style={{
                 background: `${SEVERITY_COLOR[data.severity]}1a`,
                 color: SEVERITY_COLOR[data.severity],
@@ -97,12 +97,13 @@ function AttackNodeImpl({ data, selected }: NodeProps<AttackNodeData>) {
           )}
         </div>
 
-        {/* Title + short */}
+        {/* Title + short. Sized for the framing floor in `AttackGraph`: at
+            the minimum zoom these still land above the readability floor. */}
         <div className="mt-2">
-          <div className="truncate text-[13.5px] font-medium leading-snug text-ink">
+          <div className="line-clamp-2 text-[16px] font-medium leading-snug text-ink">
             {data.title}
           </div>
-          <div className="mt-0.5 line-clamp-2 text-[11.5px] leading-snug text-ink-subtle">
+          <div className="mt-1 line-clamp-2 text-body-sm leading-snug text-ink-muted">
             {data.short}
           </div>
         </div>
@@ -119,7 +120,7 @@ function AttackNodeImpl({ data, selected }: NodeProps<AttackNodeData>) {
                 }}
               />
             </div>
-            <span className="font-mono text-micro tabular-nums text-ink-tertiary">
+            <span className="font-mono text-[13px] tabular-nums text-ink-subtle">
               {Math.round(data.successProb * 100)}%
             </span>
           </div>

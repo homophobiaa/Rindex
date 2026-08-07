@@ -231,7 +231,7 @@ export function BruteForceSim() {
         </div>
         <div className="mt-1.5 text-micro text-ink-tertiary">
           Bar height = log10(combinations). Each added character is a full
-          step taller — that\u2019s exponential.
+          step taller — that’s exponential.
         </div>
       </div>
     </div>
