@@ -6,6 +6,7 @@ import ReactFlow, {
   type Node,
   type OnSelectionChangeFunc,
   useEdgesState,
+  useNodesInitialized,
   useNodesState,
   useReactFlow,
 } from 'reactflow';
@@ -19,25 +20,22 @@ import type {
   ScenarioPhase,
 } from '@/lib/attack-paths/types';
 import type { SimulationState } from '@/lib/attack-paths/simulation';
+import {
+  HEADER_GAP,
+  HEADER_H,
+  NODE_H,
+  NODE_W,
+  layoutEdgeLabels,
+  type Rect as LabelRect,
+} from '@/lib/attack-paths/label-layout';
 import { AttackNode } from './nodes/AttackNode';
 import { AttackEdge } from './AttackEdge';
 import { PhaseHeader, type PhaseHeaderData } from './nodes/PhaseHeader';
 import { CanvasUtilities } from './CanvasUtilities';
+import { cn } from '@/lib/cn';
 
 const nodeTypes = { attack: AttackNode, phase: PhaseHeader };
 const edgeTypes = { attack: AttackEdge };
-
-/** Authored node box, in graph units. Matches `AttackNode`'s own size. */
-const NODE_W = 240;
-const NODE_H = 116;
-/**
- * Gap between a stage label and the top row of nodes. Measured from the
- * scenario's own topmost node rather than from the origin: scenarios start
- * on different rows, and a fixed offset left a 200px band of dead canvas
- * above the graph on the ones that start low.
- */
-const HEADER_GAP = 46;
-const HEADER_H = 20;
 
 /**
  * Framing bounds. Below `MIN_ZOOM` node titles stop being readable at 100%
@@ -109,9 +107,25 @@ export function AttackGraph({
     () => [...headerNodes, ...scenario.nodes.map((n) => ({ ...n }))],
     [scenario, headerNodes],
   );
+  /**
+   * Anchors say where a label sits *relative to its edge*, so resolving
+   * them is the edge's job and happens on every render. Choosing them is
+   * collision-aware and comparatively expensive, so it runs only when the
+   * graph settles — never on pointer move.
+   */
+  const initialAnchors = useMemo(() => layoutEdgeLabels(scenario), [scenario]);
+
+  const withAnchors = useCallback(
+    (e: Edge<AttackEdgeData>): Edge<AttackEdgeData> => ({
+      ...e,
+      data: { ...(e.data ?? { probability: 0 }), labelAnchor: initialAnchors[e.id] },
+    }),
+    [initialAnchors],
+  );
+
   const initialEdges = useMemo<Edge<AttackEdgeData>[]>(
-    () => scenario.edges.map((e) => ({ ...e })),
-    [scenario],
+    () => scenario.edges.map(withAnchors),
+    [scenario, withAnchors],
   );
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
@@ -201,12 +215,51 @@ export function AttackGraph({
   // instant; later ones animate so the change reads as a transition.
   useEffect(() => {
     setNodes([...headerNodes, ...scenario.nodes.map((n) => ({ ...n }))]);
-    setEdges(scenario.edges.map((e) => ({ ...e })));
+    setEdges(scenario.edges.map(withAnchors));
     const instant = firstScenario.current;
     firstScenario.current = false;
     const t = window.setTimeout(() => frame(instant ? 0 : frameDuration), 60);
     return () => window.clearTimeout(t);
-  }, [scenario, headerNodes, setNodes, setEdges, frame, frameDuration]);
+  }, [scenario, headerNodes, setNodes, setEdges, withAnchors, frame, frameDuration]);
+
+  /**
+   * Re-choose anchors against the cards' *current* rectangles. Card height
+   * is content driven (roughly 103–174px), and a dragged card moves, so the
+   * nominal box is only ever a starting guess.
+   *
+   * Labels stay attached during the drag itself because the edge resolves
+   * its anchor live; this only refines *which* anchor once things settle,
+   * which is why it can afford to be collision-aware.
+   */
+  const refineAnchors = useCallback(() => {
+    const rects = new Map<string, LabelRect>();
+    flow.getNodes().forEach((n) => {
+      if (n.type !== 'attack') return;
+      rects.set(n.id, {
+        x: n.position.x,
+        y: n.position.y,
+        w: n.width || NODE_W,
+        h: n.height || NODE_H,
+      });
+    });
+    if (rects.size === 0) return;
+    const anchors = layoutEdgeLabels(scenario, rects);
+    setEdges((prev) =>
+      prev.map((e) => {
+        const a = anchors[e.id];
+        const data = e.data as AttackEdgeData | undefined;
+        if (!a || (data?.labelAnchor?.t === a.t && data?.labelAnchor?.offset === a.offset)) {
+          return e;
+        }
+        return { ...e, data: { ...(data ?? { probability: 0 }), labelAnchor: a } };
+      }),
+    );
+  }, [flow, scenario, setEdges]);
+
+  const nodesInitialized = useNodesInitialized();
+  useEffect(() => {
+    if (nodesInitialized) refineAnchors();
+  }, [nodesInitialized, refineAnchors]);
 
   // Re-frame when the canvas itself changes size (window resize, drawer
   // open on a narrow window, orientation change).
@@ -253,17 +306,20 @@ export function AttackGraph({
     );
   }, [simulation.current, simulation.visited, setNodes]);
 
-  // Project simulation state onto live edges.
+  // Project simulation state onto live edges. `current` marks the single
+  // step the replay just took — the edge arriving at the active node — so
+  // the leading pulse never lands on more than one edge at a time.
   useEffect(() => {
     setEdges((prev) =>
       prev.map((e) => {
         const active = simulation.activeEdges.has(e.id);
+        const current = active && e.target === simulation.current;
         const data = e.data as AttackEdgeData | undefined;
-        if (data?.active === active) return e;
-        return { ...e, data: { ...(data ?? { probability: 0 }), active } };
+        if (data?.active === active && data?.current === current) return e;
+        return { ...e, data: { ...(data ?? { probability: 0 }), active, current } };
       }),
     );
-  }, [simulation.activeEdges, setEdges]);
+  }, [simulation.activeEdges, simulation.current, setEdges]);
 
   // Sync external selection back onto the nodes.
   useEffect(() => {
@@ -282,7 +338,17 @@ export function AttackGraph({
   };
 
   return (
-    <div ref={wrapRef} className="relative h-full w-full overflow-hidden">
+    /* `attack-canvas` scopes the edge/node/label stacking order and the
+       edge-motion keyframes (see globals.css) to this graph. `is-paused`
+       freezes the travelling overlays: a stopped replay should not keep
+       implying the attack is still progressing. */
+    <div
+      ref={wrapRef}
+      className={cn(
+        'attack-canvas relative h-full w-full overflow-hidden',
+        simulation.status === 'paused' && 'is-paused',
+      )}
+    >
       {/* Reusable arrow markers used by AttackEdge. */}
       <svg style={{ height: 0, width: 0, position: 'absolute' }}>
         <defs>
@@ -305,6 +371,9 @@ export function AttackGraph({
         onSelectionChange={handleSelectionChange}
         onPaneClick={() => onSelectNode(null)}
         onInit={() => frame(0)}
+        /* Anchors are refined once the card has landed, so the collision
+           pass never runs on a pointer-move. */
+        onNodeDragStop={refineAnchors}
         nodesDraggable
         nodesConnectable={false}
         elementsSelectable

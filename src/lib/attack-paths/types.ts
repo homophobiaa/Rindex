@@ -65,6 +65,18 @@ export interface AttackEdgeData {
   variant?: EdgeVariant;
   /** Runtime flag set by the simulation. Not used at authoring time. */
   active?: boolean;
+  /**
+   * Runtime flag: this is the step the replay just took, i.e. the edge
+   * leading into the current node. Drives the leading-pulse treatment.
+   */
+  current?: boolean;
+  /**
+   * Where the label sits *relative to this edge* — a fraction along the
+   * path plus a perpendicular offset — chosen by `layoutEdgeLabels` so the
+   * chip clears the cards. Resolved against live geometry on every render,
+   * which is what keeps the label attached while nodes are dragged.
+   */
+  labelAnchor?: { t: number; offset: number };
 }
 
 export type AttackNode = Node<AttackNodeData>;
